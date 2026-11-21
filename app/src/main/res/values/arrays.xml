@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="position_entries">
+        <item>Top left</item><item>Top center</item><item>Top right</item>
+        <item>Bottom left</item><item>Bottom center</item><item>Bottom right</item><item>Center</item>
+    </string-array>
+    <string-array name="position_values">
+        <item>TOP_LEFT</item><item>TOP_CENTER</item><item>TOP_RIGHT</item>
+        <item>BOTTOM_LEFT</item><item>BOTTOM_CENTER</item><item>BOTTOM_RIGHT</item><item>CENTER</item>
+    </string-array>
+    <string-array name="font_entries">
+        <item>Sans</item><item>Sans Bold</item><item>Sans Medium</item><item>Sans Light</item>
+        <item>Sans Thin</item><item>Sans Black</item><item>Condensed</item><item>Condensed Bold</item>
+        <item>Serif</item><item>Serif Bold</item><item>Serif Italic</item><item>Monospace</item>
+        <item>Monospace Bold</item><item>Casual</item><item>Cursive</item><item>Small Caps</item>
+    </string-array>
+    <string-array name="font_values">
+        <item>sans</item><item>sans_bold</item><item>sans_medium</item><item>sans_light</item>
+        <item>sans_thin</item><item>sans_black</item><item>condensed</item><item>condensed_bold</item>
+        <item>serif</item><item>serif_bold</item><item>serif_italic</item><item>mono</item>
+        <item>mono_bold</item><item>casual</item><item>cursive</item><item>smallcaps</item>
+    </string-array>
+    <string-array name="color_entries">
+        <item>White</item><item>Yellow</item><item>Orange</item><item>Red</item><item>Pink</item>
+        <item>Magenta</item><item>Purple</item><item>Blue</item><item>Cyan</item><item>Green</item>
+        <item>Lime</item><item>Light gray</item><item>Gray</item><item>Black</item>
+    </string-array>
+    <string-array name="color_values">
+        <item>#FFFFFF</item><item>#FFEB3B</item><item>#FF9800</item><item>#F44336</item><item>#FF80AB</item>
+        <item>#E040FB</item><item>#7C4DFF</item><item>#2196F3</item><item>#00BCD4</item><item>#4CAF50</item>
+        <item>#CDDC39</item><item>#E0E0E0</item><item>#9E9E9E</item><item>#000000</item>
+    </string-array>
+    <string-array name="bg_style_entries">
+        <item>None</item><item>Drop shadow</item><item>Outline</item><item>Solid box</item>
+    </string-array>
+    <string-array name="bg_style_values">
+        <item>NONE</item><item>SHADOW</item><item>OUTLINE</item><item>BOX</item>
+    </string-array>
+    <string-array name="coord_entries">
+        <item>40.75356533N 74.00507036W</item><item>40°45\'12.84\"N 74°00\'18.25\"W</item><item>40.753565, -74.005070</item>
+    </string-array>
+    <string-array name="coord_values">
+        <item>decimal</item><item>dms</item><item>signed</item>
+    </string-array>
+    <string-array name="address_entries">
+        <item>Neighborhood (e.g. Manhattan)</item><item>Street, city</item><item>City, state</item>
+        <item>City, country</item><item>Full address</item>
+    </string-array>
+    <string-array name="address_values">
+        <item>neighborhood</item><item>street</item><item>city</item><item>country</item><item>full</item>
+    </string-array>
+    <string-array name="units_entries"><item>Metric (m, km/h)</item><item>Imperial (ft, mph)</item></string-array>
+    <string-array name="units_values"><item>metric</item><item>imperial</item></string-array>
+    <string-array name="quality_entries">
+        <item>4K UHD (2160p)</item><item>Full HD (1080p)</item><item>HD (720p)</item><item>SD (480p)</item>
+    </string-array>
+    <string-array name="quality_values"><item>UHD</item><item>FHD</item><item>HD</item><item>SD</item></string-array>
+    <string-array name="aspect_entries"><item>4:3</item><item>16:9</item></string-array>
+    <string-array name="aspect_values"><item>4:3</item><item>16:9</item></string-array>
+    <string-array name="orientation_entries"><item>Auto rotate</item><item>Portrait</item><item>Landscape</item></string-array>
+    <string-array name="orientation_values"><item>auto</item><item>portrait</item><item>landscape</item></string-array>
+</resources>

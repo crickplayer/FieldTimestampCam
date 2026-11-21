@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Timestamp" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="show_time" app:title="Show date &amp; time" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="time_format" app:title="Time format (61 formats, incl. milliseconds)" app:useSimpleSummaryProvider="true" app:defaultValue="0" app:iconSpaceReserved="false" />
+        <ListPreference app:key="position" app:title="Position" app:entries="@array/position_entries" app:entryValues="@array/position_values" app:defaultValue="BOTTOM_RIGHT" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="font" app:title="Font" app:entries="@array/font_entries" app:entryValues="@array/font_values" app:defaultValue="sans" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="font_color" app:title="Font color" app:entries="@array/color_entries" app:entryValues="@array/color_values" app:defaultValue="#FFFFFF" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="font_size" app:title="Font size (%)" app:min="40" android:max="300" app:defaultValue="100" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="text_opacity" app:title="Text opacity (%)" app:min="10" android:max="100" app:defaultValue="100" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="bg_style" app:title="Background" app:entries="@array/bg_style_entries" app:entryValues="@array/bg_style_values" app:defaultValue="SHADOW" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="bg_color" app:title="Background color" app:entries="@array/color_entries" app:entryValues="@array/color_values" app:defaultValue="#000000" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="bg_opacity" app:title="Background opacity (%)" app:min="0" android:max="100" app:defaultValue="45" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Location &amp; GPS" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="show_gps" app:title="Show GPS coordinates" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="coord_format" app:title="Coordinate format" app:entries="@array/coord_entries" app:entryValues="@array/coord_values" app:defaultValue="decimal" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="show_heading" app:title="Show heading (e.g. 290° W)" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="show_address" app:title="Show location / address" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="address_format" app:title="Address format" app:entries="@array/address_entries" app:entryValues="@array/address_values" app:defaultValue="neighborhood" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <Preference app:key="pick_location" app:title="Choose location (nearby places or custom)" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="show_altitude" app:title="Show altitude" app:defaultValue="false" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="show_speed" app:title="Show speed" app:defaultValue="false" app:iconSpaceReserved="false" />
+        <ListPreference app:key="units" app:title="Units" app:entries="@array/units_entries" app:entryValues="@array/units_values" app:defaultValue="metric" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Custom text &amp; logo" app:iconSpaceReserved="false">
+        <EditTextPreference app:key="custom_text" app:title="Custom text / emoji" app:dialogMessage="e.g. Good day at the zoo 🦁 (new line = new row)" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="show_index" app:title="Show photo index number" app:defaultValue="false" app:iconSpaceReserved="false" />
+        <Preference app:key="reset_index" app:title="Reset index number to #0001" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="show_logo" app:title="Show logo image" app:defaultValue="false" app:iconSpaceReserved="false" />
+        <Preference app:key="pick_logo" app:title="Choose logo image…" app:iconSpaceReserved="false" />
+        <ListPreference app:key="logo_position" app:title="Logo position" app:entries="@array/position_entries" app:entryValues="@array/position_values" app:defaultValue="TOP_RIGHT" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="logo_size" app:title="Logo size (%)" app:min="5" android:max="60" app:defaultValue="20" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="logo_opacity" app:title="Logo opacity (%)" app:min="10" android:max="100" app:defaultValue="100" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Compass" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="show_compass" app:title="Show compass" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="compass_position" app:title="Compass position" app:entries="@array/position_entries" app:entryValues="@array/position_values" app:defaultValue="TOP_LEFT" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="compass_size" app:title="Compass size (%)" app:min="40" android:max="250" app:defaultValue="100" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Map" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="show_map" app:title="Show map" app:summary="OpenStreetMap; needs internet" app:defaultValue="false" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="map_zoom" app:title="Map scale (zoom level)" app:min="5" android:max="19" app:defaultValue="16" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="map_size" app:title="Map size (%)" app:min="10" android:max="60" app:defaultValue="30" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="map_opacity" app:title="Map opacity (%)" app:min="10" android:max="100" app:defaultValue="90" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="map_position" app:title="Map position" app:entries="@array/position_entries" app:entryValues="@array/position_values" app:defaultValue="BOTTOM_LEFT" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Camera" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="record_audio" app:title="Record video with audio" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat app:key="shutter_sound" app:title="Shutter sound" app:defaultValue="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="video_quality" app:title="Video resolution" app:entries="@array/quality_entries" app:entryValues="@array/quality_values" app:defaultValue="FHD" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="aspect_ratio" app:title="Photo/video aspect ratio" app:entries="@array/aspect_entries" app:entryValues="@array/aspect_values" app:defaultValue="4:3" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <ListPreference app:key="orientation" app:title="Screen orientation" app:entries="@array/orientation_entries" app:entryValues="@array/orientation_values" app:defaultValue="auto" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+        <SeekBarPreference app:key="battery_saver_brightness" app:title="Battery saver brightness (% of normal)" app:summary="Double-tap the preview to toggle battery saver" app:min="0" android:max="100" app:defaultValue="10" app:showSeekBarValue="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Advanced" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="save_to_sd" app:title="Save to SD card directly" app:summaryOn="Saving to DCIM/TimestampCamera on the SD card" app:defaultValue="false" app:iconSpaceReserved="false" />
+        <EditTextPreference app:key="file_prefix" app:title="File name prefix" app:useSimpleSummaryProvider="true" app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>
