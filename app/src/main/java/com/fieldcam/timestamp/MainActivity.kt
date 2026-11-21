@@ -4,6 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.PorterDuff
 import android.media.AudioManager
 import android.os.*
 import android.provider.MediaStore
@@ -18,6 +23,7 @@ import androidx.camera.effects.OverlayEffect
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
 import com.fieldcam.timestamp.databinding.ActivityMainBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private val telemetryState = TelemetryState()
     private lateinit var sensorLocationManager: SensorLocationManager
     private lateinit var renderer: TelemetryOverlayRenderer
+    private lateinit var videoRenderer: TelemetryOverlayRenderer
 
     private var camera: Camera? = null
     private var imageCapture: ImageCapture? = null
@@ -64,6 +71,8 @@ class MainActivity : AppCompatActivity() {
 
         settings = CameraSettings.load(this)
         renderer = TelemetryOverlayRenderer(settings, telemetryState)
+        videoRenderer = TelemetryOverlayRenderer(settings, telemetryState)
+        binding.stampOverlay.renderer = renderer
         sensorLocationManager = SensorLocationManager(this, telemetryState)
 
         setupUI()
@@ -147,15 +156,40 @@ class MainActivity : AppCompatActivity() {
                 .build()
             videoCapture = VideoCapture.withOutput(recorder)
 
+            // The live preview gets its stamp from StampOverlayView and photos
+            // get theirs burned in after capture (see takePhoto). Only video
+            // needs a CameraX effect, because each video frame must be stamped
+            // while recording.
             val overlayEffect = OverlayEffect(
-                CameraEffect.PREVIEW or CameraEffect.IMAGE_CAPTURE or CameraEffect.VIDEO_CAPTURE,
+                CameraEffect.VIDEO_CAPTURE,
                 0,
                 handler
             ) { error -> error.printStackTrace() }
 
             overlayEffect.setOnDrawListener { frame ->
                 val canvas = frame.overlayCanvas
-                renderer.draw(canvas, canvas.width, canvas.height)
+                // The overlay canvas keeps its old pixels, so wipe it first or
+                // every frame's text piles up on top of the last one.
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                // Video frames arrive sideways (in the camera sensor's
+                // orientation). Rotate the canvas so the stamp is upright
+                // when the video is played back.
+                val w = canvas.width.toFloat()
+                val h = canvas.height.toFloat()
+                val rotation = frame.rotationDegrees
+                canvas.save()
+                when (rotation) {
+                    90 -> { canvas.translate(0f, h); canvas.rotate(-90f) }
+                    180 -> { canvas.translate(w, h); canvas.rotate(180f) }
+                    270 -> { canvas.translate(w, 0f); canvas.rotate(90f) }
+                }
+                val sideways = rotation == 90 || rotation == 270
+                videoRenderer.draw(
+                    canvas,
+                    if (sideways) canvas.height else canvas.width,
+                    if (sideways) canvas.width else canvas.height
+                )
+                canvas.restore()
                 true
             }
 
@@ -181,33 +215,100 @@ class MainActivity : AppCompatActivity() {
         val capture = imageCapture ?: return
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val name = "${settings.filePrefix}$timestamp"
+        val mirror = lensFacing == CameraSelector.LENS_FACING_FRONT && settings.mirrorFrontCamera
 
-        val contentValues = ContentValues().apply {
+        // Capture into memory first so the stamp can be drawn onto the photo
+        // before it is saved.
+        capture.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
+            override fun onCaptureSuccess(image: ImageProxy) {
+                val saved = try {
+                    val photo = uprightBitmap(image, mirror)
+                    // A separate renderer: this runs on the camera thread while
+                    // the screen overlay keeps drawing on the main thread.
+                    TelemetryOverlayRenderer(settings, telemetryState)
+                        .draw(Canvas(photo), photo.width, photo.height)
+                    savePhoto(photo, name)
+                    photo.recycle()
+                    true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    false
+                } finally {
+                    image.close()
+                }
+                if (saved) {
+                    settings.photoIndex++
+                    settings.save(this@MainActivity)
+                }
+                runOnUiThread {
+                    val msg = if (saved) "Saved: $name.jpg" else "Could not save photo"
+                    Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onError(exc: ImageCaptureException) {
+                exc.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Photo failed: ${exc.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
+    /** Turns the captured frame upright (and mirrors selfies if asked) as an editable bitmap. */
+    private fun uprightBitmap(image: ImageProxy, mirror: Boolean): Bitmap {
+        val raw = image.toBitmap()
+        val matrix = Matrix().apply {
+            postRotate(image.imageInfo.rotationDegrees.toFloat())
+            if (mirror) postScale(-1f, 1f)
+        }
+        val turned = Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, matrix, true)
+        if (turned !== raw) raw.recycle()
+        if (turned.isMutable) return turned
+        val editable = turned.copy(Bitmap.Config.ARGB_8888, true)
+        turned.recycle()
+        return editable
+    }
+
+    /** Saves the stamped photo to Documents/Timestamp and records time and GPS in its EXIF data. */
+    private fun savePhoto(photo: Bitmap, name: String) {
+        val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Documents/Timestamp")
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
             }
         }
+        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: throw IllegalStateException("MediaStore refused the new photo")
+        try {
+            contentResolver.openOutputStream(uri)?.use { out ->
+                photo.compress(Bitmap.CompressFormat.JPEG, 95, out)
+            } ?: throw IllegalStateException("Could not open the photo file")
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-            contentResolver,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        ).build()
-
-        capture.takePicture(outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
-            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                settings.photoIndex++
-                settings.save(this@MainActivity)
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Saved: $name.jpg", Toast.LENGTH_SHORT).show()
+            contentResolver.openFileDescriptor(uri, "rw")?.use { fd ->
+                val exif = ExifInterface(fd.fileDescriptor)
+                val exifTime = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US).format(Date())
+                exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, exifTime)
+                exif.setAttribute(ExifInterface.TAG_DATETIME, exifTime)
+                val lat = telemetryState.latitude
+                val lon = telemetryState.longitude
+                if (lat != null && lon != null) {
+                    exif.setLatLong(lat, lon)
+                    exif.setAltitude(telemetryState.altitudeMeters)
                 }
+                exif.saveAttributes()
             }
-            override fun onError(exc: ImageCaptureException) {
-                exc.printStackTrace()
-            }
-        })
+        } catch (e: Exception) {
+            contentResolver.delete(uri, null, null)
+            throw e
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            contentResolver.update(uri, values, null, null)
+        }
     }
 
     @SuppressLint("MissingPermission")
