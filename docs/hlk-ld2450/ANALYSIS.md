@@ -47,7 +47,12 @@ static int16_t ld_s15(uint16_t v) { return (v & 0x8000) ? (int16_t)(v & 0x7FFF) 
 ```
 Check against the documented example, verified with this decoder:
 `AA FF 03 00 0E 03 B1 86 10 00 40 01 00…00 55 CC` → T1 X = −782 mm, Y = 1713 mm,
-v = −16 cm/s, gate = 320 mm. (The module manual says "360" here, which is a typo; 0x0140 = 320.)
+v = −16 cm/s, gate = 320 mm. Real modules report `68 01` = **360 mm**, as in the operation
+manual's captures. The FAQ says this value is fixed and can be ignored. Only X, Y and speed
+matter.
+
+Operation manual §6 captures, also decoded correctly with `ld_s15`:
+`10 01 52 83 00 00 68 01` → (−272, 850) mm, 0 cm/s; `BE 8A 47 8E 11 00 68 01` → (2750, 3655) mm, −17 cm/s.
 
 Derived values: distance = √(x² + y²); angle = atan2(x, y) (0° = straight ahead).
 
@@ -68,7 +73,10 @@ tool builds exactly this frame and validates the reply in the same way: 6-byte h
 length, then `len + 4` bytes, tail `04 03 02 01`, ACK cmd == cmd + 0x100.
 
 Every command must be wrapped in **Enable config (0x00FF, value 0x0001)** …
-**End config (0x00FE)**. Per the protocol, the radar returns to normal working mode (data frames) after End config.
+**End config (0x00FE)**. Data reporting **stops** once Enable config is acknowledged
+(operation manual §2.3) and resumes after End config. The operation manual's Bluetooth FAQ
+(§4.5) has its "on" and "off" headings swapped. Trust the values: `01 00` = on, `00 00` = off.
+Latest firmware named by the vendor: **2.04.23101915** (installed by OTA through the HLKRadarTool app).
 
 | Cmd | Purpose | Value → reply |
 |---|---|---|
@@ -99,16 +107,25 @@ sign-bit encoding used in data frames.
 | Write (phone → radar) | `0000ae01-…` |
 
 - Advertised name contains `HLK-LD2450`. The demo requests an MTU of 512.
-- Notifications carry the **same 30-byte `AA FF 03 00 … 55 CC` data frames** and the
-  same command/ACK frames as the UART (the vendor parser starts after the 4-byte header).
+- Notifications appear to carry the **same 30-byte `AA FF 03 00 … 55 CC` data frames** and
+  command/ACK frames as the UART. This is inferred from the vendor's (unused) parser and
+  command constants, not observed, so it needs checking on real hardware.
 - The demo's password check (cmd 0xA8, default password `HiLink`) is applied only to
-  LD2410-family devices, not the LD2450.
+  LD2410-family devices, not the LD2450. As far as these files show, **anyone nearby with
+  the HLK app can connect and change the radar's settings**. Consider turning radar BLE off
+  (cmd 0x00A4) once the ESP32 is in charge.
+- The module's external antenna is the **Bluetooth** antenna, not the radar antenna
+  (operation manual §4.4). It's only needed for BLE range.
+- **How many BLE connections the radar accepts at once is not stated anywhere** in the
+  vendor files (manuals, protocol, Android and iOS demo sources were searched). The same
+  is true of whether UART output continues while a phone is connected over BLE. Both are
+  unverified and need a hardware test.
 - The demo gates the LD2450 UI on firmware ≥ 2.02.23090616.
 - Its LD2450 plotting code (`analysisAreaCoordinate`) is not used by the demo, so it is
   only a reference.
 
-So the Android viewer can either connect to the **radar's own BLE** directly, or to the
-**ESP32** (which could forward the same frames). See the open decision in §6.
+Chosen design: the ESP32 reads the radar **over the UART wire**, and the phone connects to
+the **ESP32**, so the radar's own BLE connection limit does not affect us.
 
 ## 5. Display: 2.8" SPI TFT, 240×320, "TFT SPI 240X320 V1.2"
 
@@ -122,8 +139,14 @@ So the Android viewer can either connect to the **radar's own BLE** directly, or
 - The display and touch can share one SPI bus (separate CS pins).
 - Supported by TFT_eSPI / LovyanGFX (ILI9341 driver, XPT2046 touch).
 
-## 6. Open decisions for the next steps
-1. Pin mapping for the radar UART and TFT on the ESP32 DevKitC (Step 2).
-2. Phone link: ESP32 as a BLE/Wi-Fi bridge, or the phone connects to the radar's own BLE.
-   A BLE peripheral generally accepts only one central at a time, so check whether the
-   phone and the ESP32 can share the radar.
+## 6. Controller: ESP32-DevKitC-32E
+
+- Module ESP32-WROOM-32E (no PSRAM, so GPIO16/17 are free), CP2102 USB-serial chip, micro-USB.
+- Radar on **UART2**: radar **Tx → GPIO16** (ESP32 RX2), radar **Rx ← GPIO17** (ESP32 TX2),
+  radar **5V → 5V** pin (USB VBUS), **GND → GND**. No level shifting is needed (radar IO is 3.3 V).
+- The display (§5) is deferred until the radar link works.
+
+## 7. Open items
+1. Phone link from the ESP32: BLE or Wi-Fi (decide before the Android step).
+2. On hardware, verify: BLE frame format, whether UART output continues during a BLE
+   connection, and the radar's firmware version (cmd 0x00A0).
