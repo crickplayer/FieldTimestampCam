@@ -144,7 +144,23 @@ the **ESP32**, so the radar's own BLE connection limit does not affect us.
 - Module ESP32-WROOM-32E (no PSRAM, so GPIO16/17 are free), CP2102 USB-serial chip, micro-USB.
 - Radar on **UART2**: radar **Tx → GPIO16** (ESP32 RX2), radar **Rx ← GPIO17** (ESP32 TX2),
   radar **5V → 5V** pin (USB VBUS), **GND → GND**. No level shifting is needed (radar IO is 3.3 V).
-- The display (§5) is deferred until the radar link works.
+- Display (§5): **used, touch not used**. Display-only SPI on the ESP32's VSPI bus:
+
+| Display pin | ESP32-DevKitC-32E | Notes |
+|---|---|---|
+| VCC | 5V | On-board regulator (leave J1 open) |
+| GND | GND | |
+| CS | GPIO22 | |
+| RESET | GPIO4 | |
+| DC | GPIO21 | |
+| SDI(MOSI) | GPIO23 | |
+| SCK | GPIO18 | |
+| LED | GPIO32 | Backlight through Q1; PWM brightness. Can be tied to 3V3 for always-on |
+| SDO(MISO) | not connected | The display is only written to |
+| T_IRQ, T_DO, T_DIN, T_CS, T_CLK | not connected | Touch not used |
+
+None of these are ESP32 boot-strapping pins. Power budget from USB: radar ≤ 200 mA +
+display ≈ 100 mA + ESP32 ≈ 250 mA peak, which fits within a 500 mA USB port.
 
 ## 7. Open items
 1. Phone link from the ESP32: BLE or Wi-Fi (decide before the Android step).
