@@ -1,3 +1,12 @@
+# Repository layout
+
+| Folder | What it is |
+|---|---|
+| `app/` (+ Gradle files at the root) | Field Timestamp Cam, the existing Android camera app |
+| `esp32-radar-display/` | **HLK-LD2450 radar → ESP32 → 2.8" display** firmware (PlatformIO). See its README |
+| `docs/hlk-ld2450/` | Radar vendor files and `ANALYSIS.md` (protocol, Bluetooth, display, wiring) |
+| *(later)* | Android radar viewer app (live tracking on the phone) |
+
 # Field Timestamp Cam (Android)
 
 ## Build the `.apk` on Your Phone with GitHub Actions (No Laptop Needed)

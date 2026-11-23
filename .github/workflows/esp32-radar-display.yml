@@ -1,0 +1,59 @@
+name: ESP32 radar display firmware
+
+# Builds and tests the ESP32 + small-display firmware in esp32-radar-display/.
+# (The Android app has its own workflow: build-apk.yml.)
+on:
+  push:
+    paths:
+      - "esp32-radar-display/**"
+      - ".github/workflows/esp32-radar-display.yml"
+  pull_request:
+    paths:
+      - "esp32-radar-display/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: esp32-radar-display
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('esp32-radar-display/platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install platformio==6.1.18
+
+      - name: Radar protocol unit tests
+        run: pio test -e native
+
+      - name: Build firmware
+        run: pio run -e esp32dev
+
+      - name: Create single flashable image (flash at 0x0)
+        run: |
+          P=~/.platformio/packages
+          B=.pio/build/esp32dev
+          python $P/tool-esptoolpy/esptool.py --chip esp32 merge_bin \
+            -o $B/radar-display-merged.bin --flash_mode dio --flash_size 4MB \
+            0x1000 $B/bootloader.bin 0x8000 $B/partitions.bin \
+            0xe000 $P/framework-arduinoespressif32/tools/partitions/boot_app0.bin \
+            0x10000 $B/firmware.bin
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-radar-display-firmware
+          path: |
+            esp32-radar-display/.pio/build/esp32dev/radar-display-merged.bin
+            esp32-radar-display/.pio/build/esp32dev/firmware.bin
