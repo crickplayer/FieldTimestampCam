@@ -45,29 +45,27 @@ Leave the J1 pads on the back of the display open.
 
 | | Needs | Best for |
 |---|---|---|
-| **1. GitHub build + Espressif web flasher** (main method) | Chrome or Edge | Flashing a ready-made build |
-| **2. One-click flasher page** (backup) | Chrome or Edge | Same as 1, in one click |
+| **1. One-click flasher page** (main method) | Chrome or Edge | Installing the latest build: open a link, click Install |
+| **2. GitHub build + Espressif web flasher** (backup) | Chrome or Edge | If the flasher page is unavailable |
 | **3. PlatformIO** (below) | VS Code + PlatformIO | Changing settings or code yourself |
 
-### 1. GitHub build + Espressif web flasher
+### 1. One-click flasher page (main method)
+Open **https://crickplayer.github.io/FieldTimestampCam/** in Chrome or Edge on a computer,
+plug in the ESP32, click **Install firmware**, pick the **CP210x** port and confirm.
+GitHub Actions rebuilds the firmware and republishes this page on every change to `main`.
+The page source is `web-flasher/index.html`.
+
+One-time setup on GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+The page then publishes on the next push to `main`, or when you run
+**Actions → ESP32 radar display firmware → Run workflow** on `main`.
+
+### 2. GitHub build + Espressif web flasher (backup)
 1. Open the repository's **Actions** tab → **ESP32 radar display firmware** → the latest green run.
 2. Under **Artifacts**, download **esp32-radar-display-firmware** and unzip it.
 3. In Chrome or Edge open `https://espressif.github.io/esptool-js/`, click **Connect** and
    pick the **CP210x** port.
 4. Add the file **`radar-display-merged.bin`** at flash address **`0x0`**, then click **Program**.
 5. When it's done, press **EN** on the ESP32.
-
-### 2. One-click flasher page (backup)
-The page source is `web-flasher/index.html`. GitHub Actions publishes it, with the latest
-firmware, to GitHub Pages at **https://crickplayer.github.io/FieldTimestampCam/**.
-Open that page in Chrome or Edge, click **Install firmware** and pick the CP210x port.
-
-One-time setup on GitHub:
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. The page is published from the `main` branch. Until this work is merged into `main`,
-   either run the workflow by hand (**Actions → ESP32 radar display firmware → Run workflow**,
-   choose this branch) after allowing the branch under **Settings → Environments →
-   github-pages → Deployment branches**, or merge the work into `main`.
 
 ### 3. PlatformIO on Windows 10/11
 
