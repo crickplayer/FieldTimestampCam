@@ -41,7 +41,35 @@ Shows people detected by the HLK-LD2450 radar live on the 2.8" display:
 Both 5V wires go to the same 5V pin, so join them on a breadboard rail. Any GND pin works.
 Leave the J1 pads on the back of the display open.
 
-## Flash it from Windows 10/11 (PlatformIO)
+## Three ways to flash
+
+| | Needs | Best for |
+|---|---|---|
+| **1. GitHub build + Espressif web flasher** (main method) | Chrome or Edge | Flashing a ready-made build |
+| **2. One-click flasher page** (backup) | Chrome or Edge | Same as 1, in one click |
+| **3. PlatformIO** (below) | VS Code + PlatformIO | Changing settings or code yourself |
+
+### 1. GitHub build + Espressif web flasher
+1. Open the repository's **Actions** tab → **ESP32 radar display firmware** → the latest green run.
+2. Under **Artifacts**, download **esp32-radar-display-firmware** and unzip it.
+3. In Chrome or Edge open `https://espressif.github.io/esptool-js/`, click **Connect** and
+   pick the **CP210x** port.
+4. Add the file **`radar-display-merged.bin`** at flash address **`0x0`**, then click **Program**.
+5. When it's done, press **EN** on the ESP32.
+
+### 2. One-click flasher page (backup)
+The page source is `web-flasher/index.html`. GitHub Actions publishes it, with the latest
+firmware, to GitHub Pages at **https://crickplayer.github.io/FieldTimestampCam/**.
+Open that page in Chrome or Edge, click **Install firmware** and pick the CP210x port.
+
+One-time setup on GitHub:
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+2. The page is published from the `main` branch. Until this work is merged into `main`,
+   either run the workflow by hand (**Actions → ESP32 radar display firmware → Run workflow**,
+   choose this branch) after allowing the branch under **Settings → Environments →
+   github-pages → Deployment branches**, or merge the work into `main`.
+
+### 3. PlatformIO on Windows 10/11
 
 1. **Install VS Code** from code.visualstudio.com.
 2. In VS Code, open **Extensions** (Ctrl+Shift+X), search for **PlatformIO IDE**, install it,
@@ -98,6 +126,7 @@ serial debug output. Display pins are in `platformio.ini` (`build_flags`).
 | `src/main.cpp` | Reads the radar on UART2 and drives the screen |
 | `src/RadarView.*` | Everything drawn on the display |
 | `src/config.h` | User settings |
+| `web-flasher/` | The one-click browser flasher page (published to GitHub Pages by CI) |
 | `test/` | Protocol tests using the vendor's example data: `pio test -e native` |
 
 GitHub Actions (`.github/workflows/esp32-radar-display.yml`) runs the tests and builds the

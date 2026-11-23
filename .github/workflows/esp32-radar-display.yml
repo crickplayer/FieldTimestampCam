@@ -57,3 +57,63 @@ jobs:
           path: |
             esp32-radar-display/.pio/build/esp32dev/radar-display-merged.bin
             esp32-radar-display/.pio/build/esp32dev/firmware.bin
+
+  # Publishes the browser flasher (esp32-radar-display/web-flasher) with the firmware just
+  # built to GitHub Pages. Runs on the default branch, or when started by hand.
+  # One-time setup: repository Settings -> Pages -> Source: "GitHub Actions".
+  pages:
+    needs: build
+    if: github.ref_name == github.event.repository.default_branch || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: esp32-radar-display-firmware
+          path: firmware
+
+      - name: Assemble flasher site
+        run: |
+          mkdir -p site
+          cp esp32-radar-display/web-flasher/index.html site/
+          cp firmware/radar-display-merged.bin site/
+          # ESP Web Tools (Apache-2.0), pinned version, served from this site.
+          npm pack esp-web-tools@10.4.0 --silent
+          tar xzf esp-web-tools-10.4.0.tgz
+          cp -r package/dist/web site/esp-web-tools
+          cp package/LICENSE site/esp-web-tools/LICENSE 2>/dev/null || true
+          VERSION="$(date -u +%Y-%m-%d)-${GITHUB_SHA::7}"
+          cat > site/manifest.json <<JSON
+          {
+            "name": "LD2450 Radar Display",
+            "version": "${VERSION}",
+            "new_install_prompt_erase": true,
+            "builds": [
+              {
+                "chipFamily": "ESP32",
+                "parts": [{ "path": "radar-display-merged.bin", "offset": 0 }]
+              }
+            ]
+          }
+          JSON
+          cat site/manifest.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
