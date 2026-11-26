@@ -1,0 +1,58 @@
+name: ESP32-C3 round display firmware
+
+# Builds the ESP32-C3 SuperMini + GC9A01 round display firmware in esp32-c3-round-display/.
+# It reuses the radar library in esp32-radar-display/lib (tested by that project's workflow).
+on:
+  push:
+    paths:
+      - "esp32-c3-round-display/**"
+      - "esp32-radar-display/lib/**"
+      - ".github/workflows/esp32-c3-round-display.yml"
+  pull_request:
+    paths:
+      - "esp32-c3-round-display/**"
+      - "esp32-radar-display/lib/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: esp32-c3-round-display
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-c3-${{ runner.os }}-${{ hashFiles('esp32-c3-round-display/platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install platformio==6.1.18
+
+      - name: Build firmware
+        run: pio run -e c3_supermini
+
+      - name: Create single flashable image (flash at 0x0)
+        run: |
+          P=~/.platformio/packages
+          B=.pio/build/c3_supermini
+          python $P/tool-esptoolpy/esptool.py --chip esp32c3 merge_bin \
+            -o $B/round-display-merged.bin --flash_mode dio --flash_size 4MB \
+            0x0 $B/bootloader.bin 0x8000 $B/partitions.bin \
+            0xe000 $P/framework-arduinoespressif32/tools/partitions/boot_app0.bin \
+            0x10000 $B/firmware.bin
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-c3-round-display-firmware
+          path: |
+            esp32-c3-round-display/.pio/build/c3_supermini/round-display-merged.bin
+            esp32-c3-round-display/.pio/build/c3_supermini/firmware.bin

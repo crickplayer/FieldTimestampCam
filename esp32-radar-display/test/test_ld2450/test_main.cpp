@@ -194,6 +194,50 @@ void test_json_three_targets_and_small_buffer() {
   TEST_ASSERT_EQUAL_STRING("", tiny);
 }
 
+void test_json_decode_round_trip() {
+  Frame f;
+  f.targets[0] = {true, -782, 1713, -16, 0};
+  f.targets[2] = {true, 1500, 4200, 35, 0};
+  char out[256];
+  size_t n = encodeFrameJson(f, false, 4294967295u, out, sizeof(out));
+  Frame back;
+  back.targets[1].valid = true;  // must be cleared by the decoder
+  uint32_t seq = 0;
+  TEST_ASSERT_TRUE(decodeFrameJson(out, n, &back, &seq));
+  TEST_ASSERT_EQUAL_UINT32(4294967295u, seq);
+  TEST_ASSERT_TRUE(back.targets[0].valid);
+  TEST_ASSERT_EQUAL_INT16(-782, back.targets[0].x_mm);
+  TEST_ASSERT_EQUAL_INT16(1713, back.targets[0].y_mm);
+  TEST_ASSERT_EQUAL_INT16(-16, back.targets[0].speed_cms);
+  TEST_ASSERT_FALSE(back.targets[1].valid);
+  TEST_ASSERT_TRUE(back.targets[2].valid);
+  TEST_ASSERT_EQUAL_INT16(4200, back.targets[2].y_mm);
+  TEST_ASSERT_EQUAL_INT(2, back.count());
+}
+
+void test_json_decode_empty_status_and_bad_input() {
+  Frame f;
+  const char empty[] = "{\"v\":1,\"seq\":3,\"targets\":[]}";
+  TEST_ASSERT_TRUE(decodeFrameJson(empty, strlen(empty), &f, nullptr));
+  TEST_ASSERT_EQUAL_INT(0, f.count());
+
+  const char status[] = "{\"v\":1,\"type\":\"status\",\"device\":\"ld2450-ab12\"}";
+  TEST_ASSERT_FALSE(decodeFrameJson(status, strlen(status), &f, nullptr));
+
+  const char cut[] = "{\"v\":1,\"seq\":3,\"targets\":[{\"id\":1,\"x\":5,\"y\":9";
+  TEST_ASSERT_FALSE(decodeFrameJson(cut, strlen(cut), &f, nullptr));
+  const char no_close[] = "{\"targets\":[{\"id\":1,\"x\":5,\"y\":9}";
+  TEST_ASSERT_FALSE(decodeFrameJson(no_close, strlen(no_close), &f, nullptr));
+
+  // Spaces and an out-of-range id are tolerated (the id is ignored).
+  const char spaced[] = "{ \"targets\" : [ { \"id\" : 2 , \"x\" : -10 , \"y\" : 20 }, "
+                        "{\"id\":9,\"x\":1,\"y\":1} ] }";
+  TEST_ASSERT_TRUE(decodeFrameJson(spaced, strlen(spaced), &f, nullptr));
+  TEST_ASSERT_EQUAL_INT(1, f.count());
+  TEST_ASSERT_EQUAL_INT16(-10, f.targets[1].x_mm);
+  TEST_ASSERT_EQUAL_INT16(0, f.targets[1].speed_cms);
+}
+
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_signed15_encoding);
@@ -211,5 +255,7 @@ int main(int, char**) {
   RUN_TEST(test_json_one_target);
   RUN_TEST(test_json_mirror_and_empty);
   RUN_TEST(test_json_three_targets_and_small_buffer);
+  RUN_TEST(test_json_decode_round_trip);
+  RUN_TEST(test_json_decode_empty_status_and_bad_input);
   return UNITY_END();
 }

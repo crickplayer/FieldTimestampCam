@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 960" width="1200" height="960" font-family="Segoe UI, Arial, sans-serif">
+<rect width="1200" height="960" fill="#ffffff"/>
+<text x="600.0" y="40" text-anchor="middle" font-size="26" font-weight="700" fill="#1d232b">Round display wiring: GC9A01 (1.28") to ESP32-C3 SuperMini</text>
+<circle cx="260" cy="450" r="190" fill="#2560b0"/>
+<rect x="140" y="230" width="240" height="90" rx="8" fill="#2560b0"/>
+<text x="260" y="470" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">1.28" GC9A01</text>
+<text x="260" y="498" text-anchor="middle" font-size="16" fill="#dfe8f5">back side, pins along the top</text>
+<rect x="760" y="260" width="250" height="470" rx="14" fill="#1f2024"/>
+<rect x="845" y="235" width="80" height="45" rx="8" fill="#a4a9b0"/>
+<text x="885.0" y="225" text-anchor="middle" font-size="16" fill="#333">USB-C</text>
+<rect x="845" y="510" width="80" height="70" rx="6" fill="#c0c4ca"/>
+<text x="885.0" y="550" text-anchor="middle" font-size="14" font-weight="700" fill="#333">ESP32-C3</text>
+<text x="885.0" y="762" text-anchor="middle" font-size="20" font-weight="700" fill="#1d232b">ESP32-C3 SuperMini (front)</text>
+<text x="885.0" y="670" text-anchor="middle" font-size="13" fill="#bbb">BOOT</text>
+<rect x="865" y="680" width="40" height="22" rx="4" fill="#555"/>
+<circle cx="782" cy="305" r="9" fill="#e6c34a"/><text x="800" y="311" font-size="17" fill="#eee">5V</text>
+<circle cx="782" cy="360" r="9" fill="#e6c34a"/><text x="800" y="366" font-size="17" fill="#eee">GND</text>
+<circle cx="782" cy="415" r="9" fill="#e6c34a"/><text x="800" y="421" font-size="17" fill="#eee">3.3V</text>
+<circle cx="782" cy="470" r="9" fill="#e6c34a"/><text x="800" y="476" font-size="17" fill="#eee">4</text>
+<circle cx="782" cy="525" r="9" fill="#e6c34a"/><text x="800" y="531" font-size="17" fill="#eee">3</text>
+<circle cx="782" cy="580" r="9" fill="#e6c34a"/><text x="800" y="586" font-size="17" fill="#eee">2</text>
+<circle cx="782" cy="635" r="9" fill="#e6c34a"/><text x="800" y="641" font-size="17" fill="#eee">1</text>
+<circle cx="782" cy="690" r="9" fill="#e6c34a"/><text x="800" y="696" font-size="17" fill="#eee">0</text>
+<circle cx="988" cy="305" r="9" fill="#e6c34a"/><text x="970" y="311" text-anchor="end" font-size="17" fill="#eee">5</text>
+<circle cx="988" cy="360" r="9" fill="#e6c34a"/><text x="970" y="366" text-anchor="end" font-size="17" fill="#eee">6</text>
+<circle cx="988" cy="415" r="9" fill="#e6c34a"/><text x="970" y="421" text-anchor="end" font-size="17" fill="#eee">7</text>
+<circle cx="988" cy="470" r="9" fill="#e6c34a"/><text x="970" y="476" text-anchor="end" font-size="17" fill="#eee">8</text>
+<circle cx="988" cy="525" r="9" fill="#e6c34a"/><text x="970" y="531" text-anchor="end" font-size="17" fill="#eee">9</text>
+<circle cx="988" cy="580" r="9" fill="#e6c34a"/><text x="970" y="586" text-anchor="end" font-size="17" fill="#eee">10</text>
+<circle cx="988" cy="635" r="9" fill="#e6c34a"/><text x="970" y="641" text-anchor="end" font-size="17" fill="#eee">20</text>
+<circle cx="988" cy="690" r="9" fill="#e6c34a"/><text x="970" y="696" text-anchor="end" font-size="17" fill="#eee">21</text>
+<path d="M158,250 L158,80 L1090,80 L1090,580 L988,580" fill="none" stroke="#c9a400" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="158" cy="250" r="7" fill="#c9a400"/><circle cx="988" cy="580" r="7" fill="#c9a400"/>
+<path d="M192,250 L192,96 L1072,96 L1072,415 L988,415" fill="none" stroke="#f07a26" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="192" cy="250" r="7" fill="#f07a26"/><circle cx="988" cy="415" r="7" fill="#f07a26"/>
+<path d="M260,250 L260,112 L1054,112 L1054,360 L988,360" fill="none" stroke="#8a4fd0" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="260" cy="250" r="7" fill="#8a4fd0"/><circle cx="988" cy="360" r="7" fill="#8a4fd0"/>
+<path d="M226,250 L226,128 L1036,128 L1036,305 L988,305" fill="none" stroke="#16a085" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="226" cy="250" r="7" fill="#16a085"/><circle cx="988" cy="305" r="7" fill="#16a085"/>
+<path d="M294,250 L294,160 L732,160 L732,470 L782,470" fill="none" stroke="#2f7de1" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="294" cy="250" r="7" fill="#2f7de1"/><circle cx="782" cy="470" r="7" fill="#2f7de1"/>
+<path d="M328,250 L328,192 L696,192 L696,360 L782,360" fill="none" stroke="#222" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="328" cy="250" r="7" fill="#222"/><circle cx="782" cy="360" r="7" fill="#222"/>
+<path d="M362,250 L362,176 L714,176 L714,415 L782,415" fill="none" stroke="#d93030" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="362" cy="250" r="7" fill="#d93030"/><circle cx="782" cy="415" r="7" fill="#d93030"/>
+<circle cx="158" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="158" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 158 272)" dx="-34" dy="5">RST</text>
+<circle cx="192" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="192" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 192 272)" dx="-34" dy="5">CS</text>
+<circle cx="226" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="226" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 226 272)" dx="-34" dy="5">DC</text>
+<circle cx="260" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="260" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 260 272)" dx="-34" dy="5">SDA</text>
+<circle cx="294" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="294" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 294 272)" dx="-34" dy="5">SCL</text>
+<circle cx="328" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="328" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 328 272)" dx="-34" dy="5">GND</text>
+<circle cx="362" cy="250" r="9" fill="none" stroke="#6b5a1b" stroke-width="2"/>
+<text x="362" y="272" font-size="14" font-weight="700" fill="#fff" text-anchor="end" transform="rotate(-90 362 272)" dx="-34" dy="5">VCC</text>
+<text x="60" y="790" font-size="20" font-weight="700" fill="#1d232b">Seven wires, display pin → C3 pin (female-to-female jumpers):</text>
+<text x="60" y="826" font-size="19" fill="#1d232b"><tspan fill="#d93030" font-weight="700">■</tspan> VCC → 3.3V</text>
+<text x="340" y="826" font-size="19" fill="#1d232b"><tspan fill="#222" font-weight="700">■</tspan> GND → GND</text>
+<text x="620" y="826" font-size="19" fill="#1d232b"><tspan fill="#2f7de1" font-weight="700">■</tspan> SCL → GPIO 4</text>
+<text x="900" y="826" font-size="19" fill="#1d232b"><tspan fill="#8a4fd0" font-weight="700">■</tspan> SDA → GPIO 6</text>
+<text x="60" y="858" font-size="19" fill="#1d232b"><tspan fill="#16a085" font-weight="700">■</tspan> DC → GPIO 5</text>
+<text x="340" y="858" font-size="19" fill="#1d232b"><tspan fill="#f07a26" font-weight="700">■</tspan> CS → GPIO 7</text>
+<text x="620" y="858" font-size="19" fill="#1d232b"><tspan fill="#c9a400" font-weight="700">■</tspan> RST → GPIO 10</text>
+<text x="60" y="900" font-size="15" fill="#555">Match pins by the numbers printed on the board, not by position (some SuperMinis are laid out differently). VCC goes to 3.3V, not 5V.</text>
+<text x="60" y="924" font-size="15" fill="#555">On the expansion board, use the pin with the same number. Power the C3 from its USB-C socket.</text>
+</svg>

@@ -19,4 +19,11 @@ constexpr int kJsonVersion = 1;
 // terminating zero), or 0 if out is too small.
 size_t encodeFrameJson(const Frame& frame, bool mirror_x, uint32_t seq, char* out, size_t out_size);
 
+// Reads a target frame written by encodeFrameJson (used by viewers such as the round display).
+// json need not be zero-terminated. Returns true and fills frame (target i goes to slot id - 1;
+// x is used as sent, so it is already mirrored if the radar ESP32 has kMirrorX set) when the
+// message is a target frame. Returns false for other messages (e.g. "status") or bad input.
+// seq may be null.
+bool decodeFrameJson(const char* json, size_t len, Frame* frame, uint32_t* seq);
+
 }  // namespace ld2450
