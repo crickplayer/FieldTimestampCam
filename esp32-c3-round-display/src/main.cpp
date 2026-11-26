@@ -202,7 +202,7 @@ void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
 
 void handleRadarLink(unsigned long now) {
   if (radar_link == Link::Idle) {
-    if (searched_once && now - last_search_ms < kSearchRetryMs) return;
+    if (searched_once && (long)(now - last_search_ms) < (long)kSearchRetryMs) return;
     searched_once = true;
     String host;
     uint16_t port;
@@ -217,7 +217,7 @@ void handleRadarLink(unsigned long now) {
     link_since_ms = millis();
     return;
   }
-  if (radar_link == Link::Connecting && now - link_since_ms > kConnectGiveUpMs) {
+  if (radar_link == Link::Connecting && (long)(now - link_since_ms) > (long)kConnectGiveUpMs) {
     Serial.println("[radar] no answer; searching again");
     ws.disconnect();
     radar_link = Link::Idle;
@@ -274,7 +274,9 @@ void draw(unsigned long now, bool wifi) {
     return;
   }
 
-  const bool online = have_frame && now - last_frame_ms < kRadarTimeoutMs;
+  // Use a fresh millis(): frames arrive during ws.loop(), after `now` was taken, so
+  // now - last_frame_ms could wrap around and make a brand-new frame look ancient.
+  const bool online = have_frame && millis() - last_frame_ms < kRadarTimeoutMs;
   if (!online) {
     view.clearTrails();
     view.showMessage("No radar data", TFT_RED, "Connected to",
