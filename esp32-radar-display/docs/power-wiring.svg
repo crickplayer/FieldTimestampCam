@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 950" width="1200" height="950" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1200" height="950" fill="#ffffff"/>
+  <text x="600" y="38" text-anchor="middle" font-size="26" font-weight="700" fill="#1d232b">Power wiring on a breadboard: 5V and GND shared by display and radar</text>
+
+  <!-- ===================== DISPLAY (back view, as in your photo) ===================== -->
+  <rect x="50" y="70" width="380" height="260" rx="10" fill="#d9302c"/>
+  <text x="240" y="120" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">2.8" display (back side)</text>
+  <text x="240" y="146" text-anchor="middle" font-size="15" fill="#ffe3e0">header pins along the bottom edge</text>
+  <rect x="68" y="268" width="344" height="22" fill="#f2d33c"/>
+  <g font-size="11" fill="#fff" text-anchor="start">
+    <text transform="translate(84,262) rotate(-90)">T_IRQ</text>
+    <text transform="translate(108,262) rotate(-90)">T_DO</text>
+    <text transform="translate(132,262) rotate(-90)">T_DIN</text>
+    <text transform="translate(156,262) rotate(-90)">T_CS</text>
+    <text transform="translate(180,262) rotate(-90)">T_CLK</text>
+    <text transform="translate(204,262) rotate(-90)">SDO(MISO)</text>
+    <text transform="translate(228,262) rotate(-90)">LED</text>
+    <text transform="translate(252,262) rotate(-90)">SCK</text>
+    <text transform="translate(276,262) rotate(-90)">SDI(MOSI)</text>
+    <text transform="translate(300,262) rotate(-90)">DC</text>
+    <text transform="translate(324,262) rotate(-90)">RESET</text>
+    <text transform="translate(348,262) rotate(-90)">CS</text>
+    <text transform="translate(372,262) rotate(-90)" font-weight="700" font-size="13">GND</text>
+    <text transform="translate(396,262) rotate(-90)" font-weight="700" font-size="13">VCC</text>
+  </g>
+  <g fill="#8a6d00">
+    <circle cx="80" cy="279" r="5"/><circle cx="104" cy="279" r="5"/><circle cx="128" cy="279" r="5"/>
+    <circle cx="152" cy="279" r="5"/><circle cx="176" cy="279" r="5"/><circle cx="200" cy="279" r="5"/>
+    <circle cx="224" cy="279" r="5"/><circle cx="248" cy="279" r="5"/><circle cx="272" cy="279" r="5"/>
+    <circle cx="296" cy="279" r="5"/><circle cx="320" cy="279" r="5"/><circle cx="344" cy="279" r="5"/>
+  </g>
+  <circle cx="368" cy="279" r="7" fill="#111"/>
+  <circle cx="392" cy="279" r="7" fill="#c00"/>
+
+  <!-- ===================== RADAR ===================== -->
+  <rect x="500" y="150" width="240" height="120" rx="8" fill="#1f5fa8"/>
+  <text x="620" y="190" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">HLK-LD2450 radar</text>
+  <text x="620" y="214" text-anchor="middle" font-size="13" fill="#d6e6fb">pin names are printed on the module;</text>
+  <text x="620" y="231" text-anchor="middle" font-size="13" fill="#d6e6fb">match them by name, not position</text>
+  <g font-size="14" font-weight="700" fill="#fff" text-anchor="middle">
+    <text x="550" y="254" fill="#ffb3b3">5V</text>
+    <text x="600" y="254" fill="#fff">GND</text>
+    <text x="650" y="254" fill="#d6e6fb">Tx</text>
+    <text x="700" y="254" fill="#d6e6fb">Rx</text>
+  </g>
+  <circle cx="550" cy="268" r="7" fill="#c00"/>
+  <circle cx="600" cy="268" r="7" fill="#111"/>
+  <circle cx="650" cy="268" r="6" fill="#8a6d00"/>
+  <circle cx="700" cy="268" r="6" fill="#8a6d00"/>
+
+  <!-- ===================== ESP32-DevKitC-32E (USB at the bottom) ===================== -->
+  <rect x="860" y="60" width="200" height="440" rx="10" fill="#1b1d22"/>
+  <rect x="935" y="75" width="70" height="110" rx="4" fill="#b9bec6"/>
+  <text x="970" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#333">ESP-32E</text>
+  
+  <rect x="935" y="478" width="50" height="30" rx="4" fill="#9aa0a8"/>
+  <text x="960" y="530" text-anchor="middle" font-size="13" fill="#333">USB</text>
+  <text x="960" y="552" text-anchor="middle" font-size="16" font-weight="700" fill="#1d232b">ESP32-DevKitC-32E</text>
+  <!-- left column pins: 3V3 EN VP VN 34 35 32 33 25 26 27 14 12 GND 13 D2 D3 CMD 5V -->
+  <g font-size="12" fill="#ddd" text-anchor="start">
+    <text x="885" y="94">3V3</text><text x="885" y="116">EN</text><text x="885" y="138">VP</text>
+    <text x="885" y="160">VN</text><text x="885" y="182">34</text><text x="885" y="204">35</text>
+    <text x="885" y="226">32</text><text x="885" y="248">33</text><text x="885" y="270">25</text>
+    <text x="885" y="292">26</text><text x="885" y="314">27</text><text x="885" y="336">14</text>
+    <text x="885" y="358">12</text>
+    <text x="885" y="380" font-weight="700" font-size="14" fill="#fff">GND</text>
+    <text x="885" y="402">13</text><text x="885" y="424">D2</text><text x="885" y="446">D3</text>
+    <text x="885" y="468">CMD</text>
+  </g>
+  <g fill="#c9a227">
+    <circle cx="872" cy="90" r="5"/><circle cx="872" cy="112" r="5"/><circle cx="872" cy="134" r="5"/>
+    <circle cx="872" cy="156" r="5"/><circle cx="872" cy="178" r="5"/><circle cx="872" cy="200" r="5"/>
+    <circle cx="872" cy="222" r="5"/><circle cx="872" cy="244" r="5"/><circle cx="872" cy="266" r="5"/>
+    <circle cx="872" cy="288" r="5"/><circle cx="872" cy="310" r="5"/><circle cx="872" cy="332" r="5"/>
+    <circle cx="872" cy="354" r="5"/><circle cx="872" cy="398" r="5"/><circle cx="872" cy="420" r="5"/>
+    <circle cx="872" cy="442" r="5"/><circle cx="872" cy="464" r="5"/>
+  </g>
+  <circle cx="872" cy="376" r="7" fill="#111" stroke="#fff" stroke-width="2"/>
+  <circle cx="872" cy="486" r="7" fill="#c00" stroke="#fff" stroke-width="2"/>
+  <text x="885" y="491" font-size="14" font-weight="700" fill="#ff8a80">5V</text>
+  <text x="1048" y="94" text-anchor="end" font-size="12" fill="#ddd">GND</text>
+  <text x="1048" y="116" text-anchor="end" font-size="12" fill="#ddd">23</text>
+  <text x="1048" y="138" text-anchor="end" font-size="12" fill="#ddd">22</text>
+  <text x="1048" y="160" text-anchor="end" font-size="12" fill="#ddd">TX</text>
+  <text x="1048" y="182" text-anchor="end" font-size="12" fill="#ddd">RX</text>
+  <text x="1048" y="204" text-anchor="end" font-size="12" fill="#ddd">…</text>
+  <text x="1048" y="464" text-anchor="end" font-size="12" fill="#ddd">right-side pins:</text>
+  <text x="1048" y="478" text-anchor="end" font-size="12" fill="#ddd">signal wires</text>
+
+  <!-- ===================== BREADBOARD POWER RAILS ===================== -->
+  <rect x="40" y="600" width="1120" height="140" rx="8" fill="#f1efe8" stroke="#c9c5b8"/>
+  <text x="60" y="628" font-size="15" font-weight="700" fill="#555">Breadboard power rails (top edge of the breadboard)</text>
+  <line x1="70" y1="648" x2="1130" y2="648" stroke="#d32f2f" stroke-width="3"/>
+  <text x="56" y="675" font-size="22" font-weight="700" fill="#d32f2f" text-anchor="middle">+</text>
+  <line x1="70" y1="722" x2="1130" y2="722" stroke="#1565c0" stroke-width="3"/>
+  <text x="56" y="718" font-size="26" font-weight="700" fill="#1565c0" text-anchor="middle">−</text>
+  <g fill="#9e9a8c" id="holes">
+    <!-- + row holes -->
+    <circle cx="100" cy="668" r="4"/><circle cx="120" cy="668" r="4"/><circle cx="140" cy="668" r="4"/><circle cx="160" cy="668" r="4"/><circle cx="180" cy="668" r="4"/>
+    <circle cx="220" cy="668" r="4"/><circle cx="240" cy="668" r="4"/><circle cx="260" cy="668" r="4"/><circle cx="280" cy="668" r="4"/><circle cx="300" cy="668" r="4"/>
+    <circle cx="340" cy="668" r="4"/><circle cx="360" cy="668" r="4"/><circle cx="380" cy="668" r="4"/><circle cx="400" cy="668" r="4"/><circle cx="420" cy="668" r="4"/>
+    <circle cx="460" cy="668" r="4"/><circle cx="480" cy="668" r="4"/><circle cx="500" cy="668" r="4"/><circle cx="520" cy="668" r="4"/><circle cx="540" cy="668" r="4"/>
+    <circle cx="580" cy="668" r="4"/><circle cx="600" cy="668" r="4"/><circle cx="620" cy="668" r="4"/><circle cx="640" cy="668" r="4"/><circle cx="660" cy="668" r="4"/>
+    <circle cx="700" cy="668" r="4"/><circle cx="720" cy="668" r="4"/><circle cx="740" cy="668" r="4"/><circle cx="760" cy="668" r="4"/><circle cx="780" cy="668" r="4"/>
+    <circle cx="820" cy="668" r="4"/><circle cx="840" cy="668" r="4"/><circle cx="860" cy="668" r="4"/><circle cx="880" cy="668" r="4"/><circle cx="900" cy="668" r="4"/>
+    <circle cx="940" cy="668" r="4"/><circle cx="960" cy="668" r="4"/><circle cx="980" cy="668" r="4"/><circle cx="1000" cy="668" r="4"/><circle cx="1020" cy="668" r="4"/>
+    <circle cx="1060" cy="668" r="4"/><circle cx="1080" cy="668" r="4"/><circle cx="1100" cy="668" r="4"/>
+    <!-- - row holes -->
+    <circle cx="100" cy="700" r="4"/><circle cx="120" cy="700" r="4"/><circle cx="140" cy="700" r="4"/><circle cx="160" cy="700" r="4"/><circle cx="180" cy="700" r="4"/>
+    <circle cx="220" cy="700" r="4"/><circle cx="240" cy="700" r="4"/><circle cx="260" cy="700" r="4"/><circle cx="280" cy="700" r="4"/><circle cx="300" cy="700" r="4"/>
+    <circle cx="340" cy="700" r="4"/><circle cx="360" cy="700" r="4"/><circle cx="380" cy="700" r="4"/><circle cx="400" cy="700" r="4"/><circle cx="420" cy="700" r="4"/>
+    <circle cx="460" cy="700" r="4"/><circle cx="480" cy="700" r="4"/><circle cx="500" cy="700" r="4"/><circle cx="520" cy="700" r="4"/><circle cx="540" cy="700" r="4"/>
+    <circle cx="580" cy="700" r="4"/><circle cx="600" cy="700" r="4"/><circle cx="620" cy="700" r="4"/><circle cx="640" cy="700" r="4"/><circle cx="660" cy="700" r="4"/>
+    <circle cx="700" cy="700" r="4"/><circle cx="720" cy="700" r="4"/><circle cx="740" cy="700" r="4"/><circle cx="760" cy="700" r="4"/><circle cx="780" cy="700" r="4"/>
+    <circle cx="820" cy="700" r="4"/><circle cx="840" cy="700" r="4"/><circle cx="860" cy="700" r="4"/><circle cx="880" cy="700" r="4"/><circle cx="900" cy="700" r="4"/>
+    <circle cx="940" cy="700" r="4"/><circle cx="960" cy="700" r="4"/><circle cx="980" cy="700" r="4"/><circle cx="1000" cy="700" r="4"/><circle cx="1020" cy="700" r="4"/>
+    <circle cx="1060" cy="700" r="4"/><circle cx="1080" cy="700" r="4"/><circle cx="1100" cy="700" r="4"/>
+  </g>
+
+  <!-- ===================== WIRES ===================== -->
+  <g fill="none" stroke-width="6" stroke-linecap="round">
+    <!-- 1: ESP32 5V -> + rail -->
+    <path d="M872 486 C 840 560, 830 600, 820 668" stroke="#d32f2f"/>
+    <!-- 2: ESP32 GND -> - rail -->
+    <path d="M872 376 C 800 420, 790 600, 780 700" stroke="#222"/>
+    <!-- 3: display VCC -> + rail -->
+    <path d="M392 279 C 395 420, 405 560, 420 668" stroke="#d32f2f"/>
+    <!-- 4: display GND -> - rail -->
+    <path d="M368 279 C 360 440, 350 600, 340 700" stroke="#222"/>
+    <!-- 5: radar 5V -> + rail -->
+    <path d="M550 268 C 552 420, 556 560, 560 668" stroke="#d32f2f"/>
+    <!-- 6: radar GND -> - rail -->
+    <path d="M600 268 C 605 440, 615 600, 620 700" stroke="#222"/>
+  </g>
+  <!-- wire-end plugs in rail holes -->
+  <g>
+    <rect x="814" y="660" width="12" height="16" rx="2" fill="#7a1010"/>
+    <rect x="774" y="692" width="12" height="16" rx="2" fill="#000"/>
+    <rect x="414" y="660" width="12" height="16" rx="2" fill="#7a1010"/>
+    <rect x="334" y="692" width="12" height="16" rx="2" fill="#000"/>
+    <rect x="554" y="660" width="12" height="16" rx="2" fill="#7a1010"/>
+    <rect x="614" y="692" width="12" height="16" rx="2" fill="#000"/>
+  </g>
+  <!-- number badges -->
+  <g font-size="15" font-weight="700" text-anchor="middle" fill="#fff">
+    <circle cx="836" cy="560" r="14" fill="#d32f2f"/><text x="836" y="565">1</text>
+    <circle cx="806" cy="500" r="14" fill="#222"/><text x="806" y="505">2</text>
+    <circle cx="400" cy="470" r="14" fill="#d32f2f"/><text x="400" y="475">3</text>
+    <circle cx="356" cy="520" r="14" fill="#222"/><text x="356" y="525">4</text>
+    <circle cx="554" cy="440" r="14" fill="#d32f2f"/><text x="554" y="445">5</text>
+    <circle cx="610" cy="500" r="14" fill="#222"/><text x="610" y="505">6</text>
+  </g>
+
+  <!-- ===================== STEPS ===================== -->
+  <g font-size="16" fill="#1d232b">
+    <text x="50" y="778" font-weight="700">Six wires (red = 5V, black = GND):</text>
+    <text x="50" y="804"><tspan font-weight="700" fill="#d32f2f">1</tspan>  ESP32 5V → + rail</text>
+    <text x="50" y="828"><tspan font-weight="700">2</tspan>  ESP32 GND → − rail</text>
+    <text x="330" y="804"><tspan font-weight="700" fill="#d32f2f">3</tspan>  Display VCC → + rail</text>
+    <text x="330" y="828"><tspan font-weight="700">4</tspan>  Display GND → − rail</text>
+    <text x="610" y="804"><tspan font-weight="700" fill="#d32f2f">5</tspan>  Radar 5V → + rail</text>
+    <text x="610" y="828"><tspan font-weight="700">6</tspan>  Radar GND → − rail</text>
+    <text x="50" y="862" font-size="14" fill="#444">Use female-to-male jumpers (female end on the pin, male end into the rail). Any hole in the same rail row works.</text>
+    <text x="50" y="884" font-size="14" fill="#444">Long breadboards often split each rail in the middle: keep all six wires on the same half.</text>
+    <text x="50" y="906" font-size="14" fill="#444">Signal wires (CS, DC, RESET, SDI, SCK, LED, Tx, Rx) are not shown: they go pin-to-pin with female-to-female jumpers.</text>
+  </g>
+</svg>

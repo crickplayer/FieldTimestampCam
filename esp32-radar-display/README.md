@@ -39,6 +39,9 @@ Shows people detected by the HLK-LD2450 radar live on the 2.8" display:
 | Display T_IRQ, T_DO, T_DIN, T_CS, T_CLK | not connected (touch not used) |
 
 Both 5V wires go to the same 5V pin, so join them on a breadboard rail. Any GND pin works.
+
+![Power wiring on a breadboard](docs/power-wiring.png)
+
 Leave the J1 pads on the back of the display open.
 
 ## Three ways to flash
