@@ -88,6 +88,61 @@ The page then publishes on the next push to `main`, or when you run
    If it stops at `Connecting....`, hold the **Boot** button on the ESP32 until it continues.
 7. Click the **plug icon (Serial Monitor)** in the status bar to see debug output.
 
+## Wi-Fi, phone and remote viewing
+
+The ESP32 joins your Wi-Fi so phones can watch live: directly on your home network, and from
+anywhere through your MQTT broker (EMQX Cloud). **No passwords are stored in this repository.**
+You type them into the ESP32's own setup page, and the ESP32 keeps them in its flash memory.
+
+### 1. Prepare EMQX (once, in the EMQX Cloud console)
+1. Open your deployment's **Overview** and note the **connection address** (it ends in
+   `.emqxsl.com` on Serverless) and the **MQTT over TLS port** (normally **8883**).
+2. Under **Access Control → Authentication**, add two users with strong passwords:
+   one for the ESP32 (e.g. `ld2450-device`) and one for the phone app (e.g. `ld2450-viewer`).
+
+### 2. Connect the ESP32 to Wi-Fi
+1. On first start (or after holding **BOOT** for 3 seconds) the bottom of the screen shows
+   `Wi-Fi setup: join hotspot LD2450-XXXX` and a **password**.
+2. On your phone, join that Wi-Fi hotspot with that password. A setup page opens (if not,
+   browse to `192.168.4.1`).
+3. Tap **Configure WiFi**, pick your home network and enter its password.
+4. Fill in the MQTT fields: broker address, port `8883`, the ESP32's username and password,
+   encrypted `1`. Leave the broker address blank for home-network-only use.
+5. Tap **Save**. The hotspot closes, the ESP32 joins your Wi-Fi, and the top bar shows its IP
+   address.
+
+The radar view keeps running on the screen during setup.
+
+### 3. Watch it
+- **Home network, any browser:** open `http://<IP shown on the screen>/`.
+- **Android app:** coming next; it connects on the home network and through EMQX when away.
+
+### Top bar indicators
+| Indicator | Grey | Yellow | Green | Cyan |
+|---|---|---|---|---|
+| **WiFi** | Not connected | Setup hotspot open | Connected | — |
+| **Cloud** | No broker set | Connecting / failed (retries every 15 s) | Connected | A remote viewer is watching |
+
+### What goes over the network
+- `ws://<ip>:81/` (home network): live JSON frames about 10 times a second, e.g.
+  `{"v":1,"seq":42,"targets":[{"id":1,"x":-782,"y":1713,"speed":-16}]}`
+  (x, y in mm; speed in cm/s; x already mirrored if `kMirrorX` is set). The first message
+  on connect is a status message (`"type":"status"`, device id, radar firmware, IP).
+- MQTT topics, where `<id>` is e.g. `ld2450-35f4` (shown in the browser page and on the serial
+  monitor):
+
+| Topic | Direction | Content |
+|---|---|---|
+| `ld2450/<id>/status` | ESP32 → viewers | Retained status message, `"state":"online"` or `"offline"` (set by the broker if the ESP32 drops off) |
+| `ld2450/<id>/targets` | ESP32 → viewers | The same frames as the WebSocket, **only while someone is watching** |
+| `ld2450/<id>/watch` | viewers → ESP32 | Any message; the ESP32 streams for 60 s after each one, so a viewer sends one every ~30 s |
+
+Streaming only while watched (and at most once a second when the room is empty) keeps cloud
+traffic low. Continuous 10 Hz streaming would be roughly 4 GB a month.
+
+The home-network page and stream have no password: anyone on your Wi-Fi can view them.
+Remote access always goes through EMQX with TLS and your EMQX users.
+
 ## What you should see
 
 1. "LD2450 RADAR / Connecting to radar..." for about a second.
@@ -126,6 +181,9 @@ serial debug output. Display pins are in `platformio.ini` (`build_flags`).
 | `lib/LD2450/` | Radar protocol: decodes radar frames and builds commands. Plain C++ with no ESP32 code, so it is unit-tested on a PC and is the reference for the Android app's decoder later |
 | `src/main.cpp` | Reads the radar on UART2 and drives the screen |
 | `src/RadarView.*` | Everything drawn on the display |
+| `src/RadarNetwork.*` | Wi-Fi setup hotspot, home-network page and stream, MQTT (runs on the second CPU core) |
+| `src/WebPage.h` | The live view page served on the home network |
+| `src/RootCAs.h` | Root certificates for the encrypted MQTT connection |
 | `src/config.h` | User settings |
 | `web-flasher/` | The one-click browser flasher page (published to GitHub Pages by CI) |
 | `test/` | Protocol tests using the vendor's example data: `pio test -e native` |

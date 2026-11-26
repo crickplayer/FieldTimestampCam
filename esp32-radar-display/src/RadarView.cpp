@@ -71,7 +71,7 @@ void RadarView::showMessage(const char* line1, const char* line2) {
   fan_.pushSprite(0, kFanY);
 }
 
-void RadarView::render(const ld2450::Frame& frame, bool online, float fps) {
+void RadarView::render(const ld2450::Frame& frame, bool online, float fps, const NetStatus& net) {
   if (!sprites_ok_) return;
 
   if (online) {
@@ -83,9 +83,9 @@ void RadarView::render(const ld2450::Frame& frame, bool online, float fps) {
     showMessage("NO RADAR DATA", "Check radar Tx -> GPIO16, 5V and GND");
   }
 
-  drawInfo(frame, online);
+  drawInfo(frame, online, net);
   info_.pushSprite(0, kInfoY);
-  drawStatus(online ? frame.count() : 0, online, fps);
+  drawStatus(online ? frame.count() : 0, online, fps, net);
 }
 
 bool RadarView::toScreen(const ld2450::Target& t, Point* p) const {
@@ -176,10 +176,24 @@ void RadarView::drawTargets(const ld2450::Frame& frame) {
   }
 }
 
-void RadarView::drawInfo(const ld2450::Frame& frame, bool online) {
+void RadarView::drawInfo(const ld2450::Frame& frame, bool online, const NetStatus& net) {
   const uint16_t grid = rgb(0, 120, 60);
   info_.fillSprite(TFT_BLACK);
   info_.drawFastHLine(0, 0, kScreenW, grid);
+
+  if (net.setup) {
+    char line[64];
+    info_.setTextDatum(ML_DATUM);
+    info_.setTextColor(TFT_YELLOW);
+    snprintf(line, sizeof(line), "Wi-Fi setup: join hotspot %s", net.setup_ssid);
+    info_.drawString(line, 6, 12, 2);
+    info_.setTextColor(TFT_WHITE);
+    snprintf(line, sizeof(line), "Password: %s", net.setup_password);
+    info_.drawString(line, 6, 31, 2);
+    info_.setTextColor(TFT_LIGHTGREY);
+    info_.drawString("If no page opens, browse to 192.168.4.1", 6, 50, 2);
+    return;
+  }
 
   for (int i = 0; i < ld2450::kMaxTargets; i++) {
     const ld2450::Target& t = frame.targets[i];
@@ -208,16 +222,23 @@ void RadarView::drawInfo(const ld2450::Frame& frame, bool online) {
   }
 }
 
-void RadarView::drawStatus(int count, bool online, float fps) {
-  char status[64];
+void RadarView::drawStatus(int count, bool online, float fps, const NetStatus& net) {
+  char status[32];
   if (online) {
-    snprintf(status, sizeof(status), "%d %s   %.1f Hz", count, count == 1 ? "person" : "people",
-             fps);
+    snprintf(status, sizeof(status), "%d %s %.0fHz", count, count == 1 ? "person" : "people", fps);
   } else {
     snprintf(status, sizeof(status), "NO DATA");
   }
-  char key[sizeof(status) + sizeof(firmware_)];
-  snprintf(key, sizeof(key), "%s|%s", status, firmware_);
+  // Left: IP address once on Wi-Fi, otherwise the radar firmware version.
+  const char* left = net.wifi && net.ip[0] ? net.ip : firmware_;
+  // Indicator colours: green = connected, yellow = trying, grey = off / not set up.
+  const uint16_t green = TFT_GREEN, yellow = TFT_YELLOW, grey = rgb(90, 90, 90);
+  const uint16_t wifi_color = net.wifi ? green : (net.setup ? yellow : grey);
+  const uint16_t cloud_color =
+      !net.cloud_configured ? grey : (net.cloud ? (net.cloud_streaming ? TFT_CYAN : green) : yellow);
+
+  char key[sizeof(last_status_)];
+  snprintf(key, sizeof(key), "%s|%s|%u|%u", status, left, wifi_color, cloud_color);
   if (strcmp(key, last_status_) == 0) return;  // unchanged: skip redraw
   strncpy(last_status_, key, sizeof(last_status_) - 1);
   last_status_[sizeof(last_status_) - 1] = '\0';
@@ -228,7 +249,11 @@ void RadarView::drawStatus(int count, bool online, float fps) {
   tft_.setTextColor(TFT_WHITE, bar);
   tft_.drawString("LD2450", 4, kStatusH / 2, 2);
   tft_.setTextColor(TFT_LIGHTGREY, bar);
-  tft_.drawString(firmware_, 60, kStatusH / 2, 1);
+  tft_.drawString(left, 58, kStatusH / 2, 1);
+  tft_.setTextColor(wifi_color, bar);
+  tft_.drawString("WiFi", 156, kStatusH / 2, 1);
+  tft_.setTextColor(cloud_color, bar);
+  tft_.drawString("Cloud", 186, kStatusH / 2, 1);
   tft_.setTextDatum(MR_DATUM);
   tft_.setTextColor(online ? TFT_GREEN : TFT_RED, bar);
   tft_.drawString(status, kScreenW - 4, kStatusH / 2, 2);

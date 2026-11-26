@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 #include "LD2450.h"
+#include "RadarNetwork.h"
 #include "RadarView.h"
 #include "config.h"
 
@@ -65,6 +66,7 @@ void configureRadar() {
     if (ld2450::formatFirmwareVersion(parser.ack(), version, sizeof(version))) {
       Serial.printf("[radar] firmware %s\n", version);
       view.setFirmwareVersion(version);
+      radar_net::setFirmware(version);
     }
   }
 
@@ -109,6 +111,9 @@ void setup() {
 
   configureRadar();
   last_frame_ms = millis();
+
+  pinMode(kSetupButtonPin, INPUT_PULLUP);
+  radar_net::begin();
 }
 
 void loop() {
@@ -120,7 +125,20 @@ void loop() {
       last_frame_ms = now;
       have_frame = true;
       fps_count++;
+      radar_net::publishFrame(latest);
     }
+  }
+
+  // Hold BOOT for 3 s to open the Wi-Fi setup hotspot.
+  static unsigned long pressed_since = 0;
+  if (digitalRead(kSetupButtonPin) == LOW) {
+    if (pressed_since == 0) pressed_since = now;
+    if (pressed_since != 1 && now - pressed_since >= kSetupHoldMs) {
+      radar_net::requestSetup();
+      pressed_since = 1;  // fire once per press
+    }
+  } else {
+    pressed_since = 0;
   }
 
   if (now - fps_window_ms >= 1000) {
@@ -135,11 +153,11 @@ void loop() {
   static unsigned long drawn_frame_ms = 0;
   if (online && last_frame_ms != drawn_frame_ms) {
     drawn_frame_ms = last_frame_ms;
-    view.render(latest, true, fps);
+    view.render(latest, true, fps, radar_net::status());
     last_render_ms = now;
     if (kSerialDebug) printFrame(latest);
   } else if (!online && now - last_frame_ms >= kRadarTimeoutMs && now - last_render_ms >= 500) {
-    view.render(latest, false, 0);
+    view.render(latest, false, 0, radar_net::status());
     last_render_ms = now;
   }
 

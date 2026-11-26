@@ -23,5 +23,9 @@ constexpr int kTrailLength = 12;
 // Print decoded targets to the USB serial monitor (115200 baud) for debugging.
 constexpr bool kSerialDebug = true;
 
+// Hold this button (BOOT on the DevKitC) for kSetupHoldMs to open the Wi-Fi setup hotspot.
+constexpr int kSetupButtonPin = 0;
+constexpr unsigned long kSetupHoldMs = 3000;
+
 // Screen orientation: 1 = landscape. If the picture is upside down, use 3.
 constexpr uint8_t kScreenRotation = 1;

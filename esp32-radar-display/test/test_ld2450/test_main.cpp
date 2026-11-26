@@ -4,6 +4,7 @@
 #include <unity.h>
 
 #include "LD2450.h"
+#include "RadarJson.h"
 
 using namespace ld2450;
 
@@ -156,6 +157,43 @@ void test_rejects_oversized_ack_length() {
   TEST_ASSERT_EQUAL_UINT32(1, p.errorCount());
 }
 
+void test_json_one_target() {
+  Parser p;
+  feedAll(p, kProtocolExample, 30);
+  char out[256];
+  size_t n = encodeFrameJson(p.frame(), false, 7, out, sizeof(out));
+  TEST_ASSERT_EQUAL_STRING("{\"v\":1,\"seq\":7,\"targets\":[{\"id\":1,\"x\":-782,\"y\":1713,\"speed\":-16}]}", out);
+  TEST_ASSERT_EQUAL_size_t(strlen(out), n);
+}
+
+void test_json_mirror_and_empty() {
+  Parser p;
+  feedAll(p, kProtocolExample, 30);
+  char out[256];
+  encodeFrameJson(p.frame(), true, 1, out, sizeof(out));
+  TEST_ASSERT_NOT_NULL(strstr(out, "\"x\":782,"));
+  Frame empty;
+  encodeFrameJson(empty, false, 2, out, sizeof(out));
+  TEST_ASSERT_EQUAL_STRING("{\"v\":1,\"seq\":2,\"targets\":[]}", out);
+}
+
+void test_json_three_targets_and_small_buffer() {
+  Frame f;
+  for (int i = 0; i < kMaxTargets; i++) {
+    f.targets[i].valid = true;
+    f.targets[i].x_mm = -1234;
+    f.targets[i].y_mm = 5678;
+    f.targets[i].speed_cms = -100;
+  }
+  char out[256];
+  size_t n = encodeFrameJson(f, false, 4294967295u, out, sizeof(out));
+  TEST_ASSERT_TRUE(n > 0 && n < 200);  // fits the MQTT/WebSocket buffers with room to spare
+  TEST_ASSERT_NOT_NULL(strstr(out, "\"id\":3"));
+  char tiny[20];
+  TEST_ASSERT_EQUAL_size_t(0, encodeFrameJson(f, false, 1, tiny, sizeof(tiny)));
+  TEST_ASSERT_EQUAL_STRING("", tiny);
+}
+
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_signed15_encoding);
@@ -170,5 +208,8 @@ int main(int, char**) {
   RUN_TEST(test_parse_firmware_ack_and_version);
   RUN_TEST(test_ack_between_data_frames);
   RUN_TEST(test_rejects_oversized_ack_length);
+  RUN_TEST(test_json_one_target);
+  RUN_TEST(test_json_mirror_and_empty);
+  RUN_TEST(test_json_three_targets_and_small_buffer);
   return UNITY_END();
 }
