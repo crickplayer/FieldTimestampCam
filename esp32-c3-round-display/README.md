@@ -47,6 +47,24 @@ The display has no backlight pin; its backlight is always on.
    **Program**.
 6. When it's done, unplug and replug the C3 (or press its **RST** button).
 
+Flashing over USB is only needed this first time. After that, update over Wi-Fi (below).
+
+## Updating over Wi-Fi (no USB)
+
+1. Download the latest **esp32-c3-round-display-firmware** from GitHub Actions (as above) and
+   unzip it. You need **`firmware.bin`**, not the merged image.
+2. On a PC or phone on the same Wi-Fi, open **`http://<round display IP>/update`**. The IP is
+   shown in small grey text at the bottom of the round screen (also on the "Radar" screens).
+   `http://ld2450-round-xxxx.local/update` usually works too.
+3. The round display shows a **6-digit code**. Type it into the page (valid 10 minutes, one
+   use).
+4. Choose **`firmware.bin`** and tap **Update**. The round display shows the progress, then
+   restarts with the new version. The page shows the new build number when it is back.
+
+If anything goes wrong (wrong file, Wi-Fi drops, power cut), it keeps running the version it
+had. It refuses the big radar display's `firmware.bin`, and the big display refuses this one,
+so mixing up the two downloads is harmless.
+
 ## First start: Wi-Fi setup
 
 1. The display shows **Wi-Fi setup** with a hotspot name like `LD2450-Round-AB12` and a
@@ -67,6 +85,8 @@ opens again (with a new password) and closes by itself after 5 minutes.
 | Message | Meaning / what to do |
 |---|---|
 | **Wi-Fi setup** | Waiting for you to set up Wi-Fi (see above). |
+| **6-digit number** | Someone opened the update page; type the number there. |
+| **Updating 42%** | A firmware update is being written. Keep it powered. |
 | **Wi-Fi: Connecting...** | Joining your home Wi-Fi. If it stays here, see *Troubleshooting*. |
 | **Radar: Searching...** | On Wi-Fi, but no radar found. Is the radar ESP32 powered and on the same Wi-Fi? |
 | **Radar: Connecting to ...** | Found the radar, connecting. |
@@ -102,6 +122,7 @@ pio device monitor           # serial log
 |---|---|
 | `src/main.cpp` | Wi-Fi + setup hotspot, finding the radar (mDNS `_ld2450._tcp`), WebSocket client |
 | `src/RoundView.*` | Drawing on the round display |
+| `src/WebUpdate.*`, `src/WebPage.h` | Web server: status page and firmware update over Wi-Fi |
 | `src/config.h` | Settings you may want to change |
 | `docs/wiring.svg` / `.png` | Wiring diagram |
 

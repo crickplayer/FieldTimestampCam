@@ -96,7 +96,7 @@ void RoundView::showMessage(const char* title, uint16_t title_color, const char*
   push();
 }
 
-void RoundView::render(const ld2450::Frame& frame, const char* status) {
+void RoundView::render(const ld2450::Frame& frame, const char* status, const char* footer) {
   if (!sprite_ok_) return;
   last_message_[0] = '\0';  // the next message must redraw
 
@@ -107,7 +107,9 @@ void RoundView::render(const ld2450::Frame& frame, const char* status) {
 
   canvas_.setTextDatum(MC_DATUM);
   canvas_.setTextColor(rgb(140, 140, 140));
-  canvas_.drawString(status, kCenter, 218, 2);
+  canvas_.drawString(status, kCenter, 213, 2);
+  canvas_.setTextColor(rgb(90, 90, 90));
+  canvas_.drawString(footer, kCenter, 228, 1);
   push();
 }
 

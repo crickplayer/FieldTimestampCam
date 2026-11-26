@@ -21,8 +21,9 @@ class RoundView {
   RoundView();
   bool begin();
 
-  // Live radar picture. status is the short text under the radar (e.g. "10 Hz").
-  void render(const ld2450::Frame& frame, const char* status);
+  // Live radar picture. status is the short text under the radar (e.g. "10 Hz"), footer a
+  // smaller line below it (this display's IP address, for the update page).
+  void render(const ld2450::Frame& frame, const char* status, const char* footer);
 
   // Full-screen message: a title and up to four lines (null or "" = unused).
   void showMessage(const char* title, uint16_t title_color, const char* line1,

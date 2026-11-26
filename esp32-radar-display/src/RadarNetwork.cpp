@@ -22,6 +22,11 @@
 #define FW_VERSION "dev"
 #endif
 
+// Chip id stored in every ESP app image header (bytes 12-13): 0x0000 = ESP32.
+#ifndef CONFIG_IDF_FIRMWARE_CHIP_ID
+#define CONFIG_IDF_FIRMWARE_CHIP_ID 0x0000
+#endif
+
 namespace radar_net {
 namespace {
 
@@ -234,9 +239,17 @@ void handleUpdateUpload() {
       if (update_first_chunk) {
         update_first_chunk = false;
         // An ESP32 app image starts with 0xE9. Catches the merged image, zips and other files.
-        if (up.currentSize == 0 || up.buf[0] != 0xE9) {
+        if (up.currentSize < 16 || up.buf[0] != 0xE9) {
           update_failed = true;
           update_error = "That is not the right file. Upload firmware.bin (not radar-display-merged.bin).";
+          Update.abort();
+          return;
+        }
+        // Bytes 12-13 name the chip the image is for; catches the round display's firmware.bin.
+        if ((up.buf[12] | (up.buf[13] << 8)) != CONFIG_IDF_FIRMWARE_CHIP_ID) {
+          update_failed = true;
+          update_error = "That firmware is for a different board (probably the round display). "
+                         "Use firmware.bin from esp32-radar-display-firmware.";
           Update.abort();
           return;
         }

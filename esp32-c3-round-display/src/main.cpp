@@ -14,6 +14,7 @@
 #include "LD2450.h"
 #include "RadarJson.h"
 #include "RoundView.h"
+#include "WebUpdate.h"
 #include "config.h"
 
 namespace {
@@ -102,6 +103,7 @@ void makeSetupPassword() {
 void startPortal(bool wifi_saved) {
   ws.disconnect();
   radar_link = Link::Idle;
+  web_update::stop();  // the setup page needs port 80
   makeSetupPassword();
   p_radar->setValue(manual_radar.c_str(), 64);
   wm.setConfigPortalTimeout(wifi_saved ? kSetupTimeoutSec : 0);
@@ -162,11 +164,13 @@ void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
       Serial.printf("[radar] connected to %s\n", radar_host.c_str());
       radar_link = Link::Connected;
       saveCachedRadar(radar_host);
+      web_update::setRadar(radar_host.c_str());
       break;
     case WStype_DISCONNECTED:
       if (radar_link == Link::Connected) {
         Serial.println("[radar] connection lost");
         radar_link = Link::Connecting;  // the library keeps retrying the same address
+        web_update::setRadar("");
         link_since_ms = millis();
       }
       break;
@@ -224,6 +228,12 @@ void handleRadarLink(unsigned long now) {
 
 // ---- Screen ----
 
+void showUpdateProgress(int percent) {
+  char line[16];
+  snprintf(line, sizeof(line), "%d%%", percent);
+  view.showMessage("Updating", TFT_CYAN, line, "Keep it plugged in.", "It restarts when done.");
+}
+
 void draw(unsigned long now, bool wifi) {
   static unsigned long last_draw_ms = 0;
   const bool portal = wm.getConfigPortalActive();
@@ -236,19 +246,30 @@ void draw(unsigned long now, bool wifi) {
                      "then open 192.168.4.1");
     return;
   }
+  if (web_update::progress() >= 0) {
+    showUpdateProgress(web_update::progress());
+    return;
+  }
+  if (web_update::code()[0]) {
+    view.showMessage(web_update::code(), TFT_YELLOW, "Firmware update code",
+                     "Type it in the browser.", "Valid 10 minutes.");
+    return;
+  }
   if (!wifi) {
     view.clearTrails();
     view.showMessage("Wi-Fi", TFT_YELLOW, "Connecting...", WiFi.SSID().c_str(),
                      "Hold BOOT 3 s for setup");
     return;
   }
+  char my_ip[32];
+  snprintf(my_ip, sizeof(my_ip), "This display: %s", WiFi.localIP().toString().c_str());
   if (radar_link != Link::Connected) {
     view.clearTrails();
     if (radar_link == Link::Idle && searched_once) {
       view.showMessage("Radar", TFT_YELLOW, "Searching...", "Is the radar ESP32 on",
-                       "the same Wi-Fi?");
+                       "the same Wi-Fi?", my_ip);
     } else {
-      view.showMessage("Radar", TFT_CYAN, "Connecting to", radar_host.c_str());
+      view.showMessage("Radar", TFT_CYAN, "Connecting to", radar_host.c_str(), "", my_ip);
     }
     return;
   }
@@ -257,7 +278,8 @@ void draw(unsigned long now, bool wifi) {
   if (!online) {
     view.clearTrails();
     view.showMessage("No radar data", TFT_RED, "Connected to",
-                     radar_name[0] ? radar_name : radar_host.c_str(), "Is the radar sending?");
+                     radar_name[0] ? radar_name : radar_host.c_str(), "Is the radar sending?",
+                     my_ip);
     return;
   }
 
@@ -267,7 +289,7 @@ void draw(unsigned long now, bool wifi) {
     last_draw_ms = now;
     char status[32];
     snprintf(status, sizeof(status), "%.0f Hz", fps);
-    view.render(latest, status);
+    view.render(latest, status, WiFi.localIP().toString().c_str());
   }
 }
 
@@ -301,6 +323,8 @@ void setup() {
 
   pinMode(kSetupButtonPin, INPUT_PULLUP);
   loadSettings();
+  web_update::begin(device_id);
+  web_update::onProgress(showUpdateProgress);
 
   p_radar = new WiFiManagerParameter(
       "radar", "Radar address (leave blank to find it automatically)", "", 64);
@@ -354,9 +378,13 @@ void loop() {
   if (wifi) {
     if (!mdns_started && MDNS.begin(device_id)) {
       mdns_started = true;
+      MDNS.addService("http", "tcp", 80);
       Serial.printf("[net] Wi-Fi connected, IP %s\n", WiFi.localIP().toString().c_str());
     }
-    if (!portal) handleRadarLink(now);
+    if (!portal) {
+      web_update::start();
+      handleRadarLink(now);
+    }
     if (radar_link != Link::Idle) ws.loop();
   } else {
     if (radar_link != Link::Idle) {
@@ -377,6 +405,7 @@ void loop() {
     fps_window_ms = now;
   }
 
+  web_update::loop();
   draw(now, wifi);
   delay(1);
 }
