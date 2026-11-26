@@ -195,6 +195,30 @@ void RadarView::drawInfo(const ld2450::Frame& frame, bool online, const NetStatu
     return;
   }
 
+  if (net.update_progress >= 0) {
+    char line[48];
+    info_.setTextDatum(ML_DATUM);
+    info_.setTextColor(TFT_CYAN);
+    snprintf(line, sizeof(line), "Updating firmware... %d%%", net.update_progress);
+    info_.drawString(line, 6, 12, 2);
+    info_.drawRect(6, 26, kScreenW - 12, 10, TFT_DARKGREY);
+    info_.fillRect(8, 28, (kScreenW - 16) * net.update_progress / 100, 6, TFT_CYAN);
+    info_.setTextColor(TFT_LIGHTGREY);
+    info_.drawString("Keep it plugged in. It restarts when done.", 6, 50, 2);
+    return;
+  }
+
+  if (net.update_code[0]) {
+    info_.setTextDatum(ML_DATUM);
+    info_.setTextColor(TFT_LIGHTGREY);
+    info_.drawString("Firmware update code:", 6, 18, 2);
+    info_.setTextColor(TFT_YELLOW);
+    info_.drawString(net.update_code, 170, 22, 4);
+    info_.setTextColor(TFT_LIGHTGREY);
+    info_.drawString("Enter it in the browser (valid 10 min)", 6, 48, 2);
+    return;
+  }
+
   for (int i = 0; i < ld2450::kMaxTargets; i++) {
     const ld2450::Target& t = frame.targets[i];
     const int y = 3 + i * 19;

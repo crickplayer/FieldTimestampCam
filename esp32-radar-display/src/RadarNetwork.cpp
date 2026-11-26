@@ -8,6 +8,7 @@
 #include <WebSocketsServer.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include <Update.h>
 #include <WiFiManager.h>
 #include <time.h>
 
@@ -15,6 +16,11 @@
 #include "RootCAs.h"
 #include "WebPage.h"
 #include "config.h"
+
+// Firmware build id, set by CI (date + git commit); "dev" for local builds.
+#ifndef FW_VERSION
+#define FW_VERSION "dev"
+#endif
 
 namespace radar_net {
 namespace {
@@ -76,6 +82,21 @@ bool portal_was_active = false;
 char setup_ssid[24];
 char setup_password[12];
 
+// ---- Firmware update over Wi-Fi ----
+constexpr unsigned long kUpdateCodeValidMs = 10 * 60 * 1000;
+constexpr uint8_t kUpdateMaxBadCodes = 5;
+char update_code[8] = "";
+unsigned long update_code_until = 0;
+uint8_t update_bad_codes = 0;
+bool update_authorized = false;
+bool update_failed = false;
+bool update_first_chunk = false;
+size_t update_total = 0;
+String update_error;
+int8_t update_progress = -1;
+bool restart_pending = false;
+unsigned long restart_at = 0;
+
 // ---- Settings ----
 
 void loadSettings() {
@@ -117,12 +138,12 @@ String statusJson(bool online) {
   portENTER_CRITICAL(&mux);
   strncpy(fw, firmware, sizeof(fw));
   portEXIT_CRITICAL(&mux);
-  char buf[192];
+  char buf[256];
   snprintf(buf, sizeof(buf),
            "{\"v\":%d,\"type\":\"status\",\"device\":\"%s\",\"state\":\"%s\",\"fw\":\"%s\","
-           "\"ip\":\"%s\",\"mirror_x\":%s}",
+           "\"ip\":\"%s\",\"mirror_x\":%s,\"build\":\"%s\"}",
            ld2450::kJsonVersion, device_id, online ? "online" : "offline", fw, ip,
-           kMirrorX ? "true" : "false");
+           kMirrorX ? "true" : "false", FW_VERSION);
   return String(buf);
 }
 
@@ -166,8 +187,112 @@ void startHttp() {
   http_running = true;
 }
 
+// ---- Firmware update over Wi-Fi ----
+
+bool updateCodeValid() {
+  return update_code[0] != '\0' && (long)(update_code_until - millis()) > 0;
+}
+
+void newUpdateCode() {
+  snprintf(update_code, sizeof(update_code), "%06lu", (unsigned long)(esp_random() % 1000000));
+  update_code_until = millis() + kUpdateCodeValidMs;
+  update_bad_codes = 0;
+  Serial.printf("[update] code %s shown on the display\n", update_code);
+}
+
+void handleUpdateUpload() {
+  HTTPUpload& up = http.upload();
+  switch (up.status) {
+    case UPLOAD_FILE_START: {
+      update_authorized = false;
+      update_failed = false;
+      update_error = "";
+      if (!updateCodeValid()) {
+        update_error = "The code has expired. Reload this page to get a new one.";
+        update_code[0] = '\0';
+        return;
+      }
+      if (http.arg("code") != update_code) {
+        if (++update_bad_codes >= kUpdateMaxBadCodes) update_code[0] = '\0';
+        update_error = "Wrong code. Check the code on the radar's screen.";
+        return;
+      }
+      update_code[0] = '\0';  // single use
+      update_total = (size_t)http.arg("size").toInt();
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN, U_FLASH)) {
+        update_error = Update.errorString();
+        return;
+      }
+      update_authorized = true;
+      update_first_chunk = true;
+      update_progress = 0;
+      Serial.printf("[update] receiving %s (%u bytes)\n", up.filename.c_str(), (unsigned)update_total);
+      break;
+    }
+    case UPLOAD_FILE_WRITE:
+      if (!update_authorized || update_failed) return;
+      if (update_first_chunk) {
+        update_first_chunk = false;
+        // An ESP32 app image starts with 0xE9. Catches the merged image, zips and other files.
+        if (up.currentSize == 0 || up.buf[0] != 0xE9) {
+          update_failed = true;
+          update_error = "That is not the right file. Upload firmware.bin (not radar-display-merged.bin).";
+          Update.abort();
+          return;
+        }
+      }
+      if (Update.write(up.buf, up.currentSize) != up.currentSize) {
+        update_failed = true;
+        update_error = Update.errorString();
+        Update.abort();
+        return;
+      }
+      if (update_total > 0) {
+        update_progress = (int8_t)min<size_t>(99, Update.progress() * 100 / update_total);
+      }
+      break;
+    case UPLOAD_FILE_END:
+      if (!update_authorized || update_failed) return;
+      // end(true) checks the image and only then makes it the one to boot.
+      if (Update.end(true)) {
+        update_progress = 100;
+        Serial.printf("[update] %u bytes written, restarting\n", (unsigned)up.totalSize);
+      } else {
+        update_failed = true;
+        update_error = Update.errorString();
+      }
+      break;
+    case UPLOAD_FILE_ABORTED:
+      if (update_authorized) Update.abort();
+      update_failed = true;
+      update_error = "The upload was interrupted.";
+      break;
+  }
+}
+
+void handleUpdateDone() {
+  const bool ok = update_authorized && !update_failed && update_progress == 100;
+  http.sendHeader("Connection", "close");
+  if (ok) {
+    http.send(200, "text/plain", "Update complete. The radar display is restarting.");
+    restart_pending = true;
+    restart_at = millis() + 1500;
+  } else {
+    http.send(update_authorized ? 500 : 403, "text/plain",
+              update_error.length() ? update_error : String("Update failed."));
+    update_progress = -1;
+    Serial.printf("[update] failed: %s\n", update_error.c_str());
+  }
+  update_authorized = false;
+}
+
 void setupServers() {
   http.on("/", []() { http.send_P(200, "text/html", kWebPage); });
+  http.on("/update", HTTP_GET, []() {
+    newUpdateCode();
+    http.send_P(200, "text/html", kUpdatePage);
+  });
+  http.on("/update", HTTP_POST, handleUpdateDone, handleUpdateUpload);
   http.on("/status", []() { http.send(200, "application/json", statusJson(true)); });
   ws.begin();
   ws.onEvent(onWebSocketEvent);
@@ -340,7 +465,15 @@ void networkTask(void*) {
 
     publishPending();
 
+    if (restart_pending && (long)(millis() - restart_at) >= 0) {
+      mqtt.disconnect();
+      ESP.restart();
+    }
+    if (update_code[0] && !updateCodeValid()) update_code[0] = '\0';
+
     portENTER_CRITICAL(&mux);
+    strncpy(shared.update_code, update_code, sizeof(shared.update_code));
+    shared.update_progress = update_progress;
     shared.wifi = wifi;
     shared.cloud_configured = mqtt_cfg.configured();
     shared.cloud = mqtt.connected();

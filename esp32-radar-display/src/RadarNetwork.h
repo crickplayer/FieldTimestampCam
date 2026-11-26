@@ -12,6 +12,8 @@
 //      status   retained, {"state":"online"|"offline",...}
 //      targets  live frames, sent only while a viewer has sent to .../watch in the last 60 s
 //      watch    viewers publish anything here every ~30 s while they are watching
+//  * Firmware update over Wi-Fi: http://<ip>/update. Opening the page shows a one-time
+//    6-digit code on the display, which must be entered to upload firmware.bin.
 #pragma once
 
 #include <stdint.h>
@@ -29,6 +31,8 @@ struct NetStatus {
   char device_id[16] = "";
   char setup_ssid[24] = "";
   char setup_password[12] = "";
+  char update_code[8] = "";    // shown on the display while a browser is on /update
+  int8_t update_progress = -1;  // 0..100 while a firmware update is being written
 };
 
 namespace radar_net {

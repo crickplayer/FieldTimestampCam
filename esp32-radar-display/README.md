@@ -52,6 +52,21 @@ Leave the J1 pads on the back of the display open.
 | **2. GitHub build + Espressif web flasher** (backup) | Chrome or Edge | If the flasher page is unavailable |
 | **3. PlatformIO** (below) | VS Code + PlatformIO | Changing settings or code yourself |
 
+### Over Wi-Fi (after the first USB flash)
+Firmware with this feature (build from 26 Nov 2026 onwards) updates without a cable:
+1. Download **esp32-radar-display-firmware** from the latest green run of **Actions → ESP32 radar
+   display firmware** and unzip it. You need **`firmware.bin`**, not the merged image.
+2. On the same Wi-Fi, open **`http://<IP shown on the screen>/update`** (or tap *Firmware update*
+   at the bottom of the live view).
+3. The radar's screen shows a **6-digit code**. Type it in the page (valid 10 minutes, one use;
+   5 wrong tries cancel it).
+4. Choose `firmware.bin` and tap **Update**. The screen shows the progress, the ESP32 restarts,
+   and the page confirms the new **firmware build** number.
+
+The ESP32 checks the file and only switches to the new firmware if it was written and verified
+completely. Otherwise it keeps running the current one. Updating over Wi-Fi works only from your home
+network, not through EMQX.
+
 ### 1. One-click flasher page (main method)
 Open **https://crickplayer.github.io/FieldTimestampCam/** in Chrome or Edge on a computer,
 plug in the ESP32, click **Install firmware**, pick the **CP210x** port and confirm.

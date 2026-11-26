@@ -38,7 +38,10 @@ jobs:
         run: pio test -e native
 
       - name: Build firmware
-        run: pio run -e esp32dev
+        # Stamps the build with date + commit; shown at http://<ip>/update and in /status.
+        run: |
+          export PLATFORMIO_BUILD_FLAGS="-DFW_VERSION=\\\"$(date -u +%Y%m%d)-${GITHUB_SHA::7}\\\""
+          pio run -e esp32dev
 
       - name: Create single flashable image (flash at 0x0)
         run: |
