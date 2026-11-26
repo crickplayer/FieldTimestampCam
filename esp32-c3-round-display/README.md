@@ -124,6 +124,7 @@ pio device monitor           # serial log
 | `src/RoundView.*` | Drawing on the round display |
 | `src/WebUpdate.*`, `src/WebPage.h` | Web server: status page and firmware update over Wi-Fi |
 | `src/config.h` | Settings you may want to change |
+| `scripts/fix_tft_espi_c3.py` | Build-time fix for TFT_eSPI 2.5.43 on the C3 (its SPI register address is 0 with this core, which crashes on the first draw: backlight on, black screen) |
 | `docs/wiring.svg` / `.png` | Wiring diagram |
 
 How it finds the radar, in order: the address typed into the setup page (IP, or a name such as
