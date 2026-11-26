@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ESP32 on the home network only speaks plain ws:// (port 81), so cleartext must be
+     allowed. Android cannot limit this to private IP ranges; remote traffic (MQTT) is always TLS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

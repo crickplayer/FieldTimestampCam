@@ -1,0 +1,40 @@
+name: LD2450 Radar Viewer (Android)
+
+# Builds the standalone radar viewer app in radar-viewer-android/.
+# (Separate from Field Timestamp Cam, which is built by build-apk.yml.)
+on:
+  push:
+    paths:
+      - "radar-viewer-android/**"
+      - ".github/workflows/radar-viewer-android.yml"
+  pull_request:
+    paths:
+      - "radar-viewer-android/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: radar-viewer-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Build APK
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LD2450-Radar-Viewer-apk
+          path: radar-viewer-android/app/build/outputs/apk/debug/app-debug.apk

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Radar fan with one target, drawn inside the 66dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#123D28"
+        android:pathData="M54,74 L30.8,47.6 A35,35 0,0 1,77.2 47.6 Z" />
+    <path android:strokeColor="#2FBF7F" android:strokeWidth="2" android:fillColor="#00000000"
+        android:pathData="M54,74 L30.8,47.6 A35,35 0,0 1,77.2 47.6 Z" />
+    <path android:strokeColor="#2FBF7F" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M42.4,60.8 A17.5,17.5 0,0 1,65.6 60.8" />
+    <path android:fillColor="#00E5FF"
+        android:pathData="M60,52 m-5,0 a5,5 0,1 0,10 0 a5,5 0,1 0,-10 0" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,70 L50,77 L58,77 Z" />
+</vector>
