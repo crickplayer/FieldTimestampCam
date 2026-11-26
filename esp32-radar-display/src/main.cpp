@@ -3,6 +3,7 @@
 // Reads the radar over UART2, decodes up to 3 people and draws them live on the screen.
 // Decoded data is also printed to the USB serial monitor (115200 baud) for debugging.
 #include <Arduino.h>
+#include <Preferences.h>
 
 #include "LD2450.h"
 #include "RadarNetwork.h"
@@ -52,6 +53,63 @@ bool command(uint16_t cmd, const uint8_t* value = nullptr, size_t len = 0) {
 
 // Reads the firmware version and makes sure multi-target (3 people) tracking is on.
 // Failures here are not fatal: the radar streams data with its saved settings anyway.
+// Applies kRadarBluetooth to the radar. The protocol cannot read the Bluetooth state, so
+// the ESP32 remembers (per radar, by its MAC address) that the setting was applied, and only
+// sends it, with the radar restart it needs, when that radar has not had it yet.
+// Must be called in configuration mode. Returns true if the radar was restarted.
+bool applyRadarBluetooth() {
+  const uint8_t mac_value[] = {0x01, 0x00};
+  if (!command(ld2450::CMD_GET_MAC, mac_value, 2)) {
+    Serial.println("[radar] could not read MAC address; Bluetooth setting not applied");
+    return false;
+  }
+  const ld2450::Ack& ack = parser.ack();
+  char mac[20] = "";
+  for (size_t i = 0; i < ack.payload_len && i < 6; i++) {
+    snprintf(mac + 2 * i, sizeof(mac) - 2 * i, "%02x", ack.payload[i]);
+  }
+  char wanted[32];
+  snprintf(wanted, sizeof(wanted), "%s:%s", mac, kRadarBluetooth ? "on" : "off");
+
+  Preferences prefs;
+  prefs.begin("ld2450", false);
+  const bool done = prefs.getString("radar_bt", "") == wanted;
+  if (done) {
+    prefs.end();
+    Serial.printf("[radar] Bluetooth already %s (radar %s)\n", kRadarBluetooth ? "on" : "off", mac);
+    return false;
+  }
+
+  const uint8_t bt_value[] = {(uint8_t)(kRadarBluetooth ? 0x01 : 0x00), 0x00};
+  if (!command(ld2450::CMD_BLUETOOTH, bt_value, 2)) {
+    prefs.end();
+    Serial.println("[radar] Bluetooth command was not acknowledged");
+    return false;
+  }
+  prefs.putString("radar_bt", wanted);
+  prefs.end();
+  Serial.printf("[radar] Bluetooth turned %s (radar %s); restarting radar\n",
+                kRadarBluetooth ? "on" : "off", mac);
+  view.showMessage("LD2450 RADAR", kRadarBluetooth ? "Turning radar Bluetooth on..."
+                                                   : "Turning radar Bluetooth off...");
+
+  // The setting takes effect after a restart. The radar restarts itself after acknowledging.
+  command(ld2450::CMD_RESTART);
+  const unsigned long start = millis();
+  while (millis() - start < 4000) {  // wait for data frames to come back
+    bool frame = false;
+    while (radar.available()) {
+      if (parser.feed(radar.read()) == ld2450::Parser::Event::Frame) frame = true;
+    }
+    if (frame) {
+      Serial.printf("[radar] back after restart (%lu ms)\n", millis() - start);
+      break;
+    }
+    delay(10);
+  }
+  return true;
+}
+
 void configureRadar() {
   const uint8_t enable_value[] = {0x01, 0x00};
   bool in_config = command(ld2450::CMD_ENABLE_CONFIG, enable_value, 2) ||
@@ -78,6 +136,8 @@ void configureRadar() {
       Serial.println("[radar] switched to multi-target tracking");
     }
   }
+
+  if (applyRadarBluetooth()) return;  // the radar restarted, which also ends configuration
 
   // Data reporting stops while in configuration mode, so always leave it.
   if (!command(ld2450::CMD_END_CONFIG)) command(ld2450::CMD_END_CONFIG);

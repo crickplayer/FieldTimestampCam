@@ -154,6 +154,7 @@ Serial monitor (115200 baud):
 [boot] LD2450 radar display
 [radar] firmware V2.04.23101915
 [radar] tracking mode: multi target
+[radar] Bluetooth already off (radar 8f272eb80f65)
 T1 x= -782 y= 1713 mm  d=1.88m  a=-24.5deg  v= -16cm/s   T2 --   T3 --
 ```
 
@@ -172,7 +173,15 @@ T1 x= -782 y= 1713 mm  d=1.88m  a=-24.5deg  v= -16cm/s   T2 --   T3 --
 ## Settings
 
 Change these in `src/config.h`: mirror left/right, screen rotation, trail length, timeout,
-serial debug output. Display pins are in `platformio.ini` (`build_flags`).
+serial debug output.
+
+**Radar Bluetooth is turned off** (`kRadarBluetooth = false`). The project doesn't use it,
+and it has no password, so anyone nearby with Hi-Link's app could otherwise change the radar's
+settings. The radar's external antenna is only for that Bluetooth, so it isn't needed.
+The radar has no command to read the Bluetooth state, so the ESP32 remembers per radar
+(by its MAC address) that it applied the setting. The first start with a new radar, or after
+changing the setting, shows "Turning radar Bluetooth off..." and restarts the radar once.
+Later starts skip it. Set `kRadarBluetooth = true` to turn it back on. Display pins are in `platformio.ini` (`build_flags`).
 
 ## Code layout
 

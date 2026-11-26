@@ -14,6 +14,11 @@ constexpr float kFovDeg = 60.0f;
 // change this to true.
 constexpr bool kMirrorX = false;
 
+// The radar's own Bluetooth (for Hi-Link's phone app). This project does not use it, and it
+// has no password, so it is turned off. The ESP32 applies this once per radar (the radar
+// restarts once to apply it) and the radar remembers it. Set to true to turn it back on.
+constexpr bool kRadarBluetooth = false;
+
 // Show "no radar data" if no frame arrives for this long (radar sends 10 per second).
 constexpr unsigned long kRadarTimeoutMs = 1500;
 
